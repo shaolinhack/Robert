@@ -1,0 +1,19 @@
+{
+  "name": "robert-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Robert 個人網站 — 自 Wix 遷移至 Zeabur 的靜態站",
+  "scripts": {
+    "capture": "node scripts/capture.mjs",
+    "audit": "node scripts/audit.mjs",
+    "preview": "node scripts/serve.mjs",
+    "postinstall": "node -e \"console.log('\\n下一步：npx playwright install chromium，然後 npm run capture\\n')\""
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
