@@ -260,8 +260,8 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .contact-list { list-style: none; margin: var(--space-6) 0 0; padding: 0; display: grid; gap: var(--space-4); }
 @media (min-width: 700px) { .contact-list { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } }
 .contact-list dt, .contact-list__label {
-  font-size: .8125rem; font-weight: 600; letter-spacing: .08em;
-  text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--space-1);
+  font-size: .8125rem; font-weight: 600; letter-spacing: .04em;
+  color: var(--text-muted); margin-bottom: var(--space-1);
 }
 .contact-list__value { font-size: 1.0625rem; }
 
@@ -549,3 +549,46 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
   border-color: var(--invert-line); background: transparent; color: #fff;
 }
 .section--invert .social-row a:hover { background: #fff; color: var(--invert-bg); }
+
+/* ── 聯絡區（快速聯絡 + 表單並排，對齊原站）───────────────── */
+
+.contact-grid { display: grid; gap: var(--space-7); }
+@media (min-width: 900px) { .contact-grid { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
+.contact-grid .contact-list { margin-top: var(--space-5); }
+.contact-form h3 { margin: 0 0 var(--space-5); font-size: 1.375rem; }
+.contact-form__row { display: grid; gap: var(--space-4); }
+@media (min-width: 520px) { .contact-form__row { grid-template-columns: 1fr 1fr; } }
+
+.field { display: block; margin-bottom: var(--space-4); }
+.field__label {
+  display: block; font-size: .8125rem; letter-spacing: .03em;
+  color: var(--text-muted); margin-bottom: var(--space-1);
+}
+.field__input {
+  width: 100%; font: inherit; color: var(--text);
+  background: transparent; border: 0; border-bottom: 1px solid var(--border);
+  padding: 6px 2px; border-radius: 0; transition: border-color .15s;
+}
+.field__input:focus { outline: none; border-bottom-color: var(--accent); }
+.field__input::placeholder { color: var(--text-muted); }
+textarea.field__input { resize: vertical; min-height: 96px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ── 訂閱條 ─────────────────────────────────────────────── */
+
+.newsletter { display: grid; gap: var(--space-4); justify-items: center; text-align: center; }
+.newsletter__title { margin: 0; font-size: clamp(1.125rem, 1rem + .6vw, 1.375rem); }
+.newsletter__form {
+  display: flex; flex-wrap: wrap; gap: var(--space-3);
+  align-items: end; justify-content: center; width: min(520px, 100%);
+}
+.newsletter__form .field { flex: 1 1 240px; margin: 0; }
+.newsletter__form .field__input {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 10px var(--space-4);
+}
+.newsletter__form .field__input:focus { border-color: var(--accent); }

@@ -23,24 +23,23 @@
       "type": "profile",
       "title": "ABOUT ME",
       "body": [
-        "高雄人，畢業國立高雄應用科技大學。曾任鴻海／群創，現任營造相關事業。曾多次電腦相關競賽獲獎，另擁有多項不同專業技能，本身具備預防、解決、分析問題的能力。",
-        "求學至今仍不斷自我充實，期許自我成為「終身學習者」。",
-        "少年時取其豐，壯年時取其實，老年時取其精。少年時捨其不能有，壯年時捨其不當有，老年時捨其不必有。"
+        "​高雄人，畢業國立高雄應用科技大學\n曾任鴻海/群創，現任營造相關事業\n曾多次電腦相關競賽獲獎\n另擁有多項不同專業技能，\n本身具備預防、解決、分析問題能力\n求學至今仍不段自我充實，\n期許自我成為「終身學習者」",
+        "少年時取其豐，壯年時取其實，\n老年時取其精。少年時捨其不能有，\n壯年時捨其不當有，老年時捨其不必有。"
       ],
       "highlights": [
-        "⭐ 終身學習者",
-        "⭐ 創業實踐家",
-        "⭐ 斜槓人生 SLASH"
+        "⭐️終身學習者",
+        "⭐️創業實踐家",
+        "⭐️斜槓人生SLASH"
       ],
       "roles": [
-        "🏠 展旭水電｜海密水電｜耀光機電　CEO",
-        "🔷 HPX 高雄讀書會　總召",
-        "🔷 斜槓人生 SLASH　主理人",
-        "🔷 Podcast：讀癮　主持人",
-        "🔷 Facebook：蘿蔔先生｜李日韋 (Robert)",
-        "🔷 Instagram：讀癮　總編輯"
+        "🏠 展旭水電｜海密水電｜耀光機電 CEO",
+        "🔷HPX高雄讀書會 | 總召",
+        "🔷斜槓人生SLASH | 主理人",
+        "🔷Podcast：讀癮 | 主持人",
+        "🔷 Fb：蘿蔔先生｜李日韋 (Robert)",
+        "🔷 IG：讀癮 | 總編輯"
       ],
-      "note": "歡迎合作邀約，請留言或信件聯繫",
+      "note": "​歡迎合作邀約，請留言或信件聯繫",
       "social": [
         {
           "label": "Facebook",
@@ -90,7 +89,7 @@
           "icon": "users-round"
         },
         {
-          "label": "Photography",
+          "label": "photography",
           "icon": "camera"
         },
         {
@@ -122,7 +121,7 @@
           "icon": "bike"
         },
         {
-          "label": "Swimming",
+          "label": "swimming",
           "icon": "waves"
         },
         {
@@ -130,7 +129,7 @@
           "icon": "mountain"
         },
         {
-          "label": "Workout",
+          "label": "workout",
           "icon": "dumbbell"
         },
         {
@@ -157,7 +156,7 @@
         {
           "src": "/assets/site/58bc5a_07ad045251bf411fb3eaabae63a032fb~mv2.png",
           "alt": "水電機電事業",
-          "label": "海密水電工程 ｜ 展旭水電工程 ｜ 耀光機電工程"
+          "label": "海密水電工程有限公司\n展旭水電工程有限公司\n​耀光機電工程有限公司"
         }
       ]
     },
@@ -185,19 +184,19 @@
       "title": "EXPERIENCE",
       "items": [
         {
-          "role": "海密／展旭水電・耀光機電",
-          "org": "haimi.com.tw",
-          "period": "2014 – Current"
+          "role": "海密/展旭水電/耀光機電",
+          "org": "@haimi.com.tw",
+          "period": "2014 - Current"
         },
         {
           "role": "鴻海科技集團 Foxconn",
-          "org": "foxconn.com",
-          "period": "2012 – 2014"
+          "org": "@foxconn.com",
+          "period": "2012 - 2014"
         },
         {
           "role": "InnoLux Corporation",
-          "org": "innolux.com",
-          "period": "2012 – before"
+          "org": "@innolux.com",
+          "period": "2012 - before"
         }
       ]
     },
@@ -213,7 +212,11 @@
     },
     {
       "type": "contact",
+      "background": "invert",
       "title": "QUICK ID",
+      "formTitle": "CONTACT ME",
+      "email": "shaolinhack@gmail.com",
+      "endpoint": "",
       "items": [
         {
           "label": "Email",
@@ -224,14 +227,43 @@
           "label": "Website",
           "value": "jihwei.org",
           "href": "https://jihwei.org"
-        },
-        {
-          "label": "Podcast",
-          "value": "讀癮",
-          "href": "https://podcasts.apple.com/us/podcast/%E8%AE%80%E7%99%AE/id1662758348"
         }
       ],
-      "background": "invert"
+      "social": [
+        {
+          "label": "Facebook",
+          "href": "https://www.facebook.com/robert.19870329",
+          "icon": "facebook"
+        },
+        {
+          "label": "Instagram",
+          "href": "https://www.instagram.com/robert.readbook/",
+          "icon": "instagram"
+        },
+        {
+          "label": "YouTube",
+          "href": "https://www.youtube.com/channel/UC8XISv3nfPsgkUel2lM9j5w",
+          "icon": "youtube"
+        },
+        {
+          "label": "Medium",
+          "href": "https://medium.com/@shaolinhack",
+          "icon": "medium"
+        },
+        {
+          "label": "Podcast 讀癮",
+          "href": "https://podcasts.apple.com/us/podcast/%E8%AE%80%E7%99%AE/id1662758348",
+          "icon": "podcast-apple"
+        }
+      ]
+    },
+    {
+      "type": "newsletter",
+      "title": "訂閱以獲得「蘿蔔先生」最新好文!!",
+      "action": "訂閱",
+      "email": "shaolinhack@gmail.com",
+      "subject": "訂閱蘿蔔先生電子報",
+      "endpoint": ""
     }
   ]
 }

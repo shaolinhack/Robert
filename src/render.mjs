@@ -21,7 +21,9 @@ export function escapeHtml(value) {
  * 一律先做 HTML 轉義，所以內容不可能注入標籤。
  */
 export function inline(text) {
+  // 保留原文的硬斷行 —— 原站有些段落是刻意斷在特定位置的
   return escapeHtml(text)
+    .replace(/\n/g, '<br>')
     .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>')
@@ -165,7 +167,7 @@ const blocks = {
       .map(
         (item) => `<li class="logos__item reveal">
         ${image(item)}
-        ${item.label ? `<span class="logos__label">${escapeHtml(item.label)}</span>` : ''}
+        ${item.label ? `<span class="logos__label">${inline(item.label)}</span>` : ''}
       </li>`
       )
       .join('\n      ');
@@ -437,8 +439,93 @@ const blocks = {
 </section>`;
   },
 
-  /** 聯絡資訊 */
+  /**
+   * 聯絡區：左側快速聯絡資訊，右側表單（對齊原站的 QUICK ID + CONTACT ME）。
+   *
+   * 靜態網站本身不能寄信。設定了 endpoint 就 POST 給表單服務；沒設定時退回
+   * mailto —— 送出會開啟訪客的郵件軟體並帶好內容，今天就能用，之後接上服務
+   * 只要在 site.json 補一個網址，版面完全不用動。
+   */
   contact(b) {
+    const items = toArray(b.items)
+      .map((item) => {
+        const value = item.href
+          ? `<a href="${escapeHtml(item.href)}">${escapeHtml(item.value)}</a>`
+          : escapeHtml(item.value);
+        return `<div>
+        <div class="contact-list__label">${escapeHtml(item.label)}</div>
+        <div class="contact-list__value">${value}</div>
+      </div>`;
+      })
+      .join('\n      ');
+
+    const endpoint = b.endpoint || '';
+    const mailto = b.email ? `mailto:${b.email}` : '';
+    const field = (name, label, type = 'text') =>
+      `<label class="field">
+          <span class="field__label">${escapeHtml(label)}</span>
+          <input class="field__input" type="${type}" name="${name}" ${
+            name === 'message' ? '' : 'required'
+          }>
+        </label>`;
+
+    const form = b.form === false ? '' : `<form class="contact-form"${
+      endpoint ? ` action="${escapeHtml(endpoint)}" method="POST"` : ` action="${escapeHtml(mailto)}" method="POST" enctype="text/plain"`
+    }>
+        <h3>${escapeHtml(b.formTitle ?? 'CONTACT ME')}</h3>
+        <div class="contact-form__row">
+          ${field('first_name', 'First Name')}
+          ${field('last_name', 'Last Name')}
+        </div>
+        ${field('email', 'Email', 'email')}
+        ${field('subject', 'Subject')}
+        <label class="field">
+          <span class="field__label">Message</span>
+          <textarea class="field__input" name="message" rows="4"></textarea>
+        </label>
+        <button class="btn btn--primary" type="submit">Submit</button>
+      </form>`;
+
+    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-grid__info">
+        ${eyebrow(b.eyebrow)}
+        ${heading(b.title)}
+        ${b.body ? paragraphs(b.body) : ''}
+        <div class="contact-list">
+      ${items}
+        </div>
+        ${renderSocialRow(b.social)}
+      </div>
+      ${form}
+    </div>
+  </div>
+</section>`;
+  },
+
+  /** 電子報訂閱條 */
+  newsletter(b) {
+    const endpoint = b.endpoint || '';
+    const mailto = b.email ? `mailto:${b.email}?subject=${encodeURIComponent(b.subject ?? '訂閱電子報')}` : '';
+    return `<section class="section section--tight${b.background ? ` section--${b.background}` : ''}">
+  <div class="container newsletter">
+    <h2 class="newsletter__title">${inline(b.title)}</h2>
+    <form class="newsletter__form"${
+      endpoint ? ` action="${escapeHtml(endpoint)}" method="POST"` : ` action="${escapeHtml(mailto)}" method="POST" enctype="text/plain"`
+    }>
+      <label class="field field--inline">
+        <span class="sr-only">E-mail</span>
+        <input class="field__input" type="email" name="email" placeholder="E-mail" required>
+      </label>
+      <button class="btn btn--primary" type="submit">${escapeHtml(b.action ?? '訂閱')}</button>
+    </form>
+  </div>
+</section>`;
+  },
+
+  /** 聯絡資訊（僅清單，無表單） */
+  'contact-list'(b) {
     const items = toArray(b.items)
       .map((item) => {
         const value = item.href
