@@ -167,28 +167,24 @@
       "title": "SKILL",
       "items": [
         {
-          "label": "AI & Vibe Coding",
+          "label": "AI 開發",
           "icon": "sparkles"
         },
         {
-          "label": "自動化 n8n",
+          "label": "自動化",
           "icon": "workflow"
         },
         {
-          "label": "Talk",
-          "icon": "mic"
-        },
-        {
-          "label": "MIS",
+          "label": "資訊系統",
           "icon": "server"
-        },
-        {
-          "label": "Time Management",
-          "icon": "clock"
         },
         {
           "label": "專案管理",
           "icon": "kanban"
+        },
+        {
+          "label": "時間管理",
+          "icon": "clock"
         },
         {
           "label": "品牌經營",
