@@ -9,6 +9,7 @@
     "unzip": "node scripts/unpack-zip.mjs",
     "import": "node scripts/import-chrome-save.mjs",
     "build": "node scripts/build.mjs",
+    "offline": "node scripts/make-offline.mjs",
     "audit": "node scripts/audit.mjs",
     "preview": "node scripts/serve.mjs",
     "dev": "node scripts/build.mjs && node scripts/serve.mjs",

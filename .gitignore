@@ -4,6 +4,7 @@ node_modules/
 .capture-cache/
 capture-report.json
 public/
+offline/
 
 # inbox 只保留說明、路由設定與上傳的 ZIP；解壓出來的內容不進版控
 inbox/*
