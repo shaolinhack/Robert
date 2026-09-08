@@ -446,3 +446,54 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .site-footer__inner { flex-direction: column; text-align: center; }
 @media (min-width: 640px) { .site-footer__inner { flex-direction: row; text-align: left; } }
 .social { flex-wrap: wrap; justify-content: center; }
+
+/* ── 文章頁 ─────────────────────────────────────────────────
+   內文限制在易讀寬度；圖片、引用與分隔線可以突出到更寬，
+   讓長文有節奏而不是一路平鋪。
+   ───────────────────────────────────────────────────────── */
+
+.post__header { padding-block: var(--space-8) var(--space-6); }
+.post__head-inner { max-width: var(--measure); }
+.post__back {
+  display: inline-block; margin-bottom: var(--space-4);
+  font-size: .9375rem; text-decoration: none; color: var(--text-muted);
+}
+.post__back:hover { color: var(--accent); }
+.post__header h1 { margin: 0 0 var(--space-3); font-size: clamp(1.625rem, 1.3rem + 1.6vw, 2.375rem); }
+.post__meta {
+  margin: 0; color: var(--text-muted); font-size: .9375rem;
+  display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center;
+}
+.post__meta span[aria-hidden] { opacity: .5; }
+
+.post__cover { margin-bottom: var(--space-7); }
+.post__cover img { width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+
+.post__body { max-width: var(--measure); padding-bottom: var(--space-9); }
+.post__body > * { margin-block: 0 var(--space-5); }
+.post__body h2 { margin-top: var(--space-8); font-size: 1.5rem; }
+.post__body h3 { margin-top: var(--space-7); font-size: 1.1875rem; }
+.post__body ul, .post__body ol { padding-left: 1.4em; }
+.post__body li { margin-block: var(--space-2); }
+.post__body figure { margin-block: var(--space-6); }
+.post__body figure img { width: 100%; border-radius: var(--radius); }
+.post__body figcaption {
+  margin-top: var(--space-2); color: var(--text-muted);
+  font-size: .875rem; text-align: center;
+}
+.post__body blockquote {
+  margin-block: var(--space-6); padding: var(--space-4) var(--space-5);
+  border-left: 3px solid var(--accent); background: var(--bg-subtle);
+  border-radius: 0 var(--radius) var(--radius) 0; color: var(--text);
+}
+.post__body hr {
+  border: 0; height: 1px; background: var(--border);
+  margin-block: var(--space-7);
+}
+.post__body strong { font-weight: 700; }
+
+/* 文章卡片上的日期與閱讀時間 */
+.card__meta {
+  margin: 0; font-size: .8125rem; color: var(--text-muted);
+  font-variant-numeric: tabular-nums; letter-spacing: .02em;
+}

@@ -88,8 +88,41 @@ async function loadPages() {
  * 把區塊裡的 source 換成 content/ 底下的實際資料。
  * 時間軸這種會一直長的內容獨立成資料檔，頁面只要指名要哪一份就好。
  */
-function resolveData(page, milestones) {
+function resolveData(page, { milestones, posts }) {
+  // 文章頁在 content 裡是「一篇文章」的形狀（標題、日期、內文節點），
+  // 而不是區塊陣列 —— 寫文章的人不該去組版面。這裡把它展開成區塊。
+  if (page.layout === 'post') {
+    page = {
+      ...page,
+      blocks: [
+        {
+          type: 'post-header',
+          title: page.title,
+          published: page.published,
+          updated: page.updated,
+          readTime: page.readTime,
+          cover: page.cover,
+        },
+        { type: 'article', nodes: page.body },
+      ],
+    };
+  }
+
   const blocks = (page.blocks ?? []).map((block) => {
+    // 文章列表由 posts-index.json 產生，新增文章時列表自動跟著更新
+    if (block.type === 'cards' && block.source === 'posts') {
+      const items = [...posts]
+        .sort((a, b) => String(b.published).localeCompare(String(a.published)))
+        .map((post) => ({
+          title: post.title,
+          body: post.description,
+          href: `/post/${post.slug}`,
+          image: post.cover ? { src: post.cover.src ?? post.cover, alt: post.title } : undefined,
+          meta: [post.published?.slice(0, 10).replace(/-/g, '.'), post.readTime].filter(Boolean).join('　·　'),
+        }));
+      return { ...block, items };
+    }
+
     if (block.type !== 'timeline' || !block.source) return block;
     const items = milestones[block.source];
     if (!items) {
@@ -191,6 +224,7 @@ async function main() {
 
   const site = { ...DEFAULT_SITE, ...((await readJson(path.join(CONTENT_DIR, 'site.json'))) ?? {}) };
   const milestones = (await readJson(path.join(CONTENT_DIR, 'milestones.json'))) ?? {};
+  const posts = (await readJson(path.join(CONTENT_DIR, 'posts-index.json'))) ?? [];
 
   // 1. 快照打底
   const hasSnapshot = await isNonEmptyDir(SNAPSHOT_DIR);
@@ -203,7 +237,7 @@ async function main() {
   // 2. 重寫版覆蓋
   const pages = await loadPages();
   for (const page of pages) {
-    await write(fileFromRoute(page.route), renderPage({ site, page: resolveData(page, milestones) }));
+    await write(fileFromRoute(page.route), renderPage({ site, page: resolveData(page, { milestones, posts }) }));
   }
 
   // 3. 設計系統與自備素材

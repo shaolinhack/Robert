@@ -187,13 +187,74 @@ const blocks = {
 </section>`;
   },
 
-  /** 純文字段落 */
+  /** 文章頁抬頭：標題、日期、閱讀時間、封面 */
+  'post-header'(b) {
+    const date = b.published ? new Date(b.published) : null;
+    const iso = date ? date.toISOString().slice(0, 10) : '';
+    const shown = date
+      ? `${date.getFullYear()} 年 ${date.getMonth() + 1} 月 ${date.getDate()} 日`
+      : '';
+
+    const meta = [
+      shown ? `<time datetime="${iso}">${shown}</time>` : '',
+      b.readTime ? `<span>${escapeHtml(b.readTime)}</span>` : '',
+    ]
+      .filter(Boolean)
+      .join('<span aria-hidden="true">·</span>');
+
+    return `<article class="post">
+  <header class="post__header">
+    <div class="container post__head-inner">
+      <a class="post__back" href="/blog">← 回部落格</a>
+      <h1>${inline(b.title)}</h1>
+      ${meta ? `<p class="post__meta">${meta}</p>` : ''}
+    </div>
+  </header>
+  ${b.cover?.src ? `<div class="container"><div class="post__cover">${image({ ...b.cover, eager: true })}</div></div>` : ''}`;
+  },
+
+  /** 文章內文：把節點陣列渲染成語意化 HTML */
+  article(b) {
+    const nodes = toArray(b.nodes)
+      .map((node) => {
+        switch (node.t) {
+          case 'h2':
+          case 'h3':
+            return `<${node.t}>${inline(node.text)}</${node.t}>`;
+          case 'ul':
+          case 'ol':
+            return `<${node.t}>${toArray(node.items)
+              .map((x) => `<li>${inline(x)}</li>`)
+              .join('')}</${node.t}>`;
+          case 'img':
+            return `<figure>${image(node)}${
+              node.caption ? `<figcaption>${inline(node.caption)}</figcaption>` : ''
+            }</figure>`;
+          case 'quote':
+            return `<blockquote>${inline(node.text)}</blockquote>`;
+          case 'hr':
+            return '<hr>';
+          default:
+            return `<p>${inline(node.text)}</p>`;
+        }
+      })
+      .join('\n      ');
+
+    return `  <div class="container">
+    <div class="post__body">
+      ${nodes}
+    </div>
+  </div>
+</article>`;
+  },
+
+  /** 純文字段落。level 用來指定標題階層 —— 每頁應該剛好有一個 h1。 */
   prose(b) {
     return `<section class="section${b.background ? ` section--${b.background}` : ''}">
   <div class="container">
     <div class="prose${b.align === 'center' ? ' prose--center' : ''}">
       ${eyebrow(b.eyebrow)}
-      ${heading(b.title)}
+      ${heading(b.title, b.level ?? 2)}
       ${paragraphs(b.body)}
       ${actions(b.actions)}
     </div>
@@ -226,6 +287,7 @@ const blocks = {
       .map((item) => {
         const inner = `
       ${image(item.image)}
+      ${item.meta ? `<p class="card__meta">${escapeHtml(item.meta)}</p>` : ''}
       ${heading(item.title, 3)}
       ${item.body ? `<p>${inline(item.body)}</p>` : ''}`;
         return item.href
@@ -500,6 +562,57 @@ const BEHAVIOUR_SCRIPT = `<script>
   });
 <\/script>`;
 
+/**
+ * 結構化資料（JSON-LD）。這是搜尋引擎與 AI 判斷「這個站是誰的」的主要依據：
+ * Person 的 sameAs 把各社群帳號串成同一個人，文章則標明作者、日期與摘要，
+ * 被引用時才有明確的出處可依。
+ */
+function renderJsonLd({ site, page }) {
+  const url = (route) => (site.baseUrl ? new URL(route, site.baseUrl).toString() : route);
+
+  const person = {
+    '@type': 'Person',
+    '@id': `${url('/')}#person`,
+    name: site.title,
+    url: url('/'),
+    ...(site.description ? { description: site.description } : {}),
+    ...(site.logo ? { image: url(site.logo) } : {}),
+    ...(toArray(site.social).length
+      ? { sameAs: toArray(site.social).map((s) => s.href) }
+      : {}),
+  };
+
+  const graph = [person];
+
+  if (page.layout === 'post') {
+    graph.push({
+      '@type': 'BlogPosting',
+      headline: page.title,
+      ...(page.description ? { description: page.description } : {}),
+      ...(page.published ? { datePublished: page.published } : {}),
+      ...(page.updated ? { dateModified: page.updated } : {}),
+      ...(page.cover?.src ? { image: url(page.cover.src) } : {}),
+      author: { '@id': person['@id'] },
+      publisher: { '@id': person['@id'] },
+      mainEntityOfPage: url(page.route),
+      inLanguage: site.lang ?? 'zh-Hant',
+    });
+  } else {
+    graph.push({
+      '@type': 'WebSite',
+      url: url('/'),
+      name: site.title,
+      ...(site.description ? { description: site.description } : {}),
+      publisher: { '@id': person['@id'] },
+      inLanguage: site.lang ?? 'zh-Hant',
+    });
+  }
+
+  const json = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })
+    .replace(/</g, '\\u003C');
+  return `<script type="application/ld+json">${json}</script>`;
+}
+
 export function renderPage({ site, page }) {
   const title = page.route === '/' ? site.title : `${page.title} — ${site.title}`;
   const description = page.description ?? site.description ?? '';
@@ -525,6 +638,7 @@ export function renderPage({ site, page }) {
     '<meta name="twitter:card" content="summary_large_image">',
     '<link rel="stylesheet" href="/assets/styles.css">',
     site.favicon && `<link rel="icon" href="${escapeHtml(site.favicon)}">`,
+    renderJsonLd({ site, page }),
   ].filter(Boolean).join('\n  ');
 
   return `<!doctype html>
