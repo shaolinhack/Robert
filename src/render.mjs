@@ -155,6 +155,13 @@ const blocks = {
         ${highlights ? `<ul class="profile__highlights">\n        ${highlights}\n      </ul>` : ''}
         ${roles ? `<ul class="profile__roles">\n        ${roles}\n      </ul>` : ''}
         ${b.note ? `<p class="profile__note">${inline(b.note)}</p>` : ''}
+        ${
+          b.noteAction
+            ? `<a class="mail-link" href="${escapeHtml(b.noteAction.href)}">` +
+              `${icon(b.noteAction.icon ?? 'mail', { size: 18 })}` +
+              `<span>${escapeHtml(b.noteAction.label)}</span></a>`
+            : ''
+        }
       </div>
     </div>
   </div>
@@ -467,9 +474,12 @@ const blocks = {
         const value = item.href
           ? `<a href="${escapeHtml(item.href)}">${escapeHtml(item.value)}</a>`
           : escapeHtml(item.value);
-        return `<div>
-        <div class="contact-list__label">${escapeHtml(item.label)}</div>
-        <div class="contact-list__value">${value}</div>
+        return `<div class="contact-list__row">
+        ${item.icon ? `<span class="contact-list__icon">${icon(item.icon, { size: 20 })}</span>` : ''}
+        <div>
+          <div class="contact-list__label">${escapeHtml(item.label)}</div>
+          <div class="contact-list__value">${value}</div>
+        </div>
       </div>`;
       })
       .join('\n      ');
@@ -511,7 +521,14 @@ const blocks = {
         <div class="contact-list">
       ${items}
         </div>
-        ${renderSocialRow(b.social)}
+        ${
+          b.social?.length
+            ? `<div class="contact-follow">
+          ${b.socialTitle ? `<p class="contact-follow__label">${escapeHtml(b.socialTitle)}</p>` : ''}
+          ${renderSocialRow(b.social)}
+        </div>`
+            : ''
+        }
       </div>
       ${form}
     </div>
@@ -546,9 +563,12 @@ const blocks = {
         const value = item.href
           ? `<a href="${escapeHtml(item.href)}">${escapeHtml(item.value)}</a>`
           : escapeHtml(item.value);
-        return `<div>
-        <div class="contact-list__label">${escapeHtml(item.label)}</div>
-        <div class="contact-list__value">${value}</div>
+        return `<div class="contact-list__row">
+        ${item.icon ? `<span class="contact-list__icon">${icon(item.icon, { size: 20 })}</span>` : ''}
+        <div>
+          <div class="contact-list__label">${escapeHtml(item.label)}</div>
+          <div class="contact-list__value">${value}</div>
+        </div>
       </div>`;
       })
       .join('\n      ');

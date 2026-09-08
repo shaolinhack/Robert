@@ -26,6 +26,12 @@
   --invert-muted:  #c6d2e6;
   --invert-line:   #47608c;
   /* 品牌標誌帶永遠白底：深色去背的標誌在深色模式會整個消失 */
+  /* 圖示與時間軸用的藍色階，跟深藍帶 #2e4975 是同一個色系 */
+  --blue:          #2e4975;
+  --blue-hover:    #22375a;
+  --blue-wash:     #e4eaf4;
+  --blue-line:     #b9c8de;
+
   --brand-band:    #ffffff;
   --brand-text:    #131a2b;
   --brand-muted:   #5a6478;
@@ -250,6 +256,12 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
   color: var(--text-muted); margin-bottom: var(--space-1);
 }
 .contact-list__value { font-size: 1.0625rem; }
+.contact-list__row { display: flex; align-items: flex-start; gap: var(--space-3); }
+.contact-list__icon {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 34px; height: 34px; border-radius: 10px; margin-top: 1px;
+  background: rgb(255 255 255 / .12); color: inherit;
+}
 
 /* ── 頁尾 ───────────────────────────────────────────────────── */
 
@@ -275,7 +287,7 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 /* 中軸線 */
 .timeline::before {
   content: ""; position: absolute; top: 0; bottom: 0; left: 11px;
-  width: 2px; background: var(--border); border-radius: 1px;
+  width: 2px; background: var(--blue-line); border-radius: 1px;
 }
 
 .timeline__item { position: relative; padding-left: 40px; }
@@ -283,13 +295,13 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .timeline__marker {
   position: absolute; left: 4px; top: 6px;
   width: 16px; height: 16px; border-radius: 50%;
-  background: var(--bg); border: 3px solid var(--accent);
+  background: var(--bg); border: 3px solid var(--blue);
 }
-.timeline__item--highlight .timeline__marker { background: var(--accent); }
+.timeline__item--highlight .timeline__marker { background: var(--blue); }
 
 .timeline__date {
   font-size: .8125rem; font-weight: 700; letter-spacing: .06em;
-  color: var(--accent); margin: 0 0 var(--space-1);
+  color: var(--blue); margin: 0 0 var(--space-1);
   font-variant-numeric: tabular-nums;
 }
 .timeline__title { font-size: 1.0625rem; margin: 0; line-height: 1.45; }
@@ -327,11 +339,11 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
   border: 1px solid var(--border); background: transparent; color: var(--text-muted);
   transition: color .15s, border-color .15s;
 }
-.timeline-filter button:hover { color: var(--text); border-color: var(--accent); }
+.timeline-filter button:hover { color: var(--blue); border-color: var(--blue); }
 .timeline-filter button[aria-pressed="true"] {
-  color: var(--accent-text); background: var(--accent); border-color: var(--accent); font-weight: 600;
+  color: #fff; background: var(--blue); border-color: var(--blue); font-weight: 600;
 }
-.timeline-filter button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.timeline-filter button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 .timeline__note { text-align: center; color: var(--text-muted); font-size: .875rem; margin-top: var(--space-5); }
 
 /* ── 圖示牆 ─────────────────────────────────────────────── */
@@ -346,13 +358,22 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 }
 .icon-grid__badge {
   display: grid; place-items: center; width: 62px; height: 62px;
-  border-radius: 16px; background: var(--bg-inset); color: var(--accent);
+  border-radius: 16px; background: var(--blue-wash); color: var(--blue);
+  border: 1px solid var(--blue-line);
   transition: background-color .18s, color .18s, transform .18s;
 }
 .icon-grid__item:hover .icon-grid__badge {
-  background: var(--accent); color: var(--accent-text); transform: translateY(-3px);
+  background: var(--blue); border-color: var(--blue); color: #fff; transform: translateY(-3px);
 }
 .icon-grid__label { font-size: .875rem; color: var(--text-muted); }
+
+/* 手機固定一列三個，格子才不會忽寬忽窄 */
+@media (max-width: 639px) {
+  .icon-grid { grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+  .icon-grid__badge { width: 54px; height: 54px; border-radius: 14px; }
+  .icon-grid__badge svg { width: 24px; height: 24px; }
+  .icon-grid__label { font-size: .8125rem; line-height: 1.4; }
+}
 
 /* ── 捲動淡入 ───────────────────────────────────────────── */
 
@@ -412,11 +433,22 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 
 .profile { display: grid; gap: var(--space-6); margin-top: var(--space-5); }
 @media (min-width: 860px) { .profile { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
-.profile__bio { color: var(--text-muted); }
+.profile__bio { color: var(--text); }
 .profile__highlights, .profile__roles { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
 .profile__highlights { font-weight: 600; margin-bottom: var(--space-5); }
-.profile__roles { color: var(--text-muted); }
+.profile__roles { color: var(--text); }
 .profile__note { margin-top: var(--space-5); font-weight: 600; }
+
+/* 合作邀約下面直接放一個可以點的信箱 */
+.mail-link {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  margin-top: var(--space-3); padding: 7px 14px 7px 11px;
+  border: 1px solid var(--accent-line); border-radius: 999px;
+  background: var(--accent-wash); color: var(--accent);
+  font-size: .9375rem; font-weight: 600; text-decoration: none;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.mail-link:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
 
 /* ── 品牌標誌 ───────────────────────────────────────────── */
 
@@ -541,9 +573,37 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 
 /* ── 聯絡區（快速聯絡 + 表單並排，對齊原站）───────────────── */
 
-.contact-grid { display: grid; gap: var(--space-7); }
-@media (min-width: 900px) { .contact-grid { grid-template-columns: 1fr 1fr; gap: var(--space-8); } }
+.contact-grid { display: grid; gap: var(--space-5); }
+@media (min-width: 900px) { .contact-grid { grid-template-columns: 1fr 1fr; } }
 .contact-grid .contact-list { margin-top: var(--space-5); }
+
+/* 兩半各自一塊卡片，深淺不同才看得出來是左右兩區 */
+.section--invert .contact-grid__info,
+.section--invert .contact-form {
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+}
+.section--invert .contact-grid__info { background: #24395e; }
+.section--invert .contact-form      { background: #3a5a8c; }
+@media (min-width: 900px) {
+  .section--invert .contact-grid__info,
+  .section--invert .contact-form { padding: var(--space-7); }
+}
+
+/* QUICK ID 下方的社群列：跟上面的聯絡資料用一條線分開，並補上小標 */
+/* 表單那邊比較高，把社群列壓在底部，左半邊才不會空一大塊 */
+.section--invert .contact-grid__info { display: flex; flex-direction: column; }
+.section--invert .contact-follow { margin-top: auto; }
+.contact-follow {
+  margin-top: var(--space-6); padding-top: var(--space-5);
+  border-top: 1px solid rgb(255 255 255 / .18);
+}
+.contact-follow__label {
+  margin: 0 0 var(--space-3);
+  font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--invert-muted);
+}
+.contact-follow .social-row { margin: 0; }
 .contact-form h3 { margin: 0 0 var(--space-5); font-size: 1.375rem; }
 .contact-form__row { display: grid; gap: var(--space-4); }
 @media (min-width: 520px) { .contact-form__row { grid-template-columns: 1fr 1fr; } }

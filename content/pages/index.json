@@ -34,9 +34,7 @@
       "roles": [
         "🏠 展旭水電｜海密水電｜耀光機電 CEO",
         "🔷HPX高雄讀書會 | 總召",
-        "🔷斜槓人生SLASH | 主理人",
         "🔷Podcast：讀癮 | 主持人",
-        "🔷 Fb：蘿蔔先生｜李日韋 (Robert)",
         "🔷 IG：讀癮 | 總編輯"
       ],
       "note": "​歡迎合作邀約，請留言或信件聯繫",
@@ -66,7 +64,12 @@
           "href": "https://podcasts.apple.com/us/podcast/%E8%AE%80%E7%99%AE/id1662758348",
           "icon": "podcast-apple"
         }
-      ]
+      ],
+      "noteAction": {
+        "icon": "mail",
+        "label": "shaolinhack@gmail.com",
+        "href": "mailto:shaolinhack@gmail.com"
+      }
     },
     {
       "type": "icon-grid",
@@ -252,12 +255,14 @@
         {
           "label": "Email",
           "value": "shaolinhack@gmail.com",
-          "href": "mailto:shaolinhack@gmail.com"
+          "href": "mailto:shaolinhack@gmail.com",
+          "icon": "mail"
         },
         {
           "label": "Website",
           "value": "jihwei.org",
-          "href": "https://jihwei.org"
+          "href": "https://jihwei.org",
+          "icon": "globe"
         }
       ],
       "social": [
@@ -286,7 +291,8 @@
           "href": "https://podcasts.apple.com/us/podcast/%E8%AE%80%E7%99%AE/id1662758348",
           "icon": "podcast-apple"
         }
-      ]
+      ],
+      "socialTitle": "FOLLOW ME"
     },
     {
       "type": "newsletter",
