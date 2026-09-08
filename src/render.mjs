@@ -147,9 +147,9 @@ const blocks = {
     <div class="profile">
       <div class="profile__bio reveal">
         ${paragraphs(b.body)}
-        ${renderSocialRow(b.social)}
       </div>
       <div class="profile__side reveal">
+        ${renderSocialRow(b.social)}
         ${highlights ? `<ul class="profile__highlights">\n        ${highlights}\n      </ul>` : ''}
         ${roles ? `<ul class="profile__roles">\n        ${roles}\n      </ul>` : ''}
         ${b.note ? `<p class="profile__note">${inline(b.note)}</p>` : ''}

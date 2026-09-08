@@ -8,18 +8,21 @@
 
   /* 色彩 —— 淺色模式 */
   --bg:            #ffffff;
-  --bg-subtle:     #f8f6f6;
-  --bg-inset:      #f0ecec;
-  --text:          #1a1618;
-  --text-muted:    #6b6266;
-  --border:        #e7e1e2;
-  /* 品牌紅取自原站（#ed1c24）。文字用略深的 #d31119 —— 原色在白底上只有
-     4.38:1，低於無障礙標準；深一階後 5.43:1，肉眼幾乎看不出差別。 */
-  --accent:        #d31119;
-  --accent-hover:  #a8121a;
+  --bg-subtle:     #edeff5;
+  --bg-inset:      #e2e6f0;
+  --text:          #070a0e;
+  --text-muted:    #5b6472;
+  --border:        #d8dde8;
+  /* 以下三色直接取自原站：強調紅、淺灰底、聯絡區深藍 */
+  --accent:        #df3143;
+  --accent-hover:  #b3212f;
   --accent-text:   #ffffff;
-  --accent-wash:   #fdf1f1;
-  --accent-line:   #f5d8d9;
+  --accent-wash:   #fdeef0;
+  --accent-line:   #f6d5da;
+  --invert-bg:     #2e4975;
+  --invert-text:   #ffffff;
+  --invert-muted:  #c3cfe4;
+  --invert-line:   #46608c;
 
   /* 字體 */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto,
@@ -41,18 +44,21 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg:            #121014;
-    --bg-subtle:     #1a1719;
-    --bg-inset:      #221e21;
-    --text:          #f0eaec;
-    --text-muted:    #a9a0a4;
-    --border:        #302a2d;
-    /* 深底上要提亮才讀得到：#ff6b6b 對 #121014 是 6.8:1 */
-    --accent:        #ff6b6b;
-    --accent-hover:  #ff8f8f;
-    --accent-text:   #121014;
-    --accent-wash:   #241618;
-    --accent-line:   #3d2429;
+    --bg:            #0f1218;
+    --bg-subtle:     #161a23;
+    --bg-inset:      #1d222d;
+    --text:          #e8ebf2;
+    --text-muted:    #99a2b3;
+    --border:        #272d3a;
+    --accent:        #ff6b7a;
+    --accent-hover:  #ff8f9a;
+    --accent-text:   #0f1218;
+    --accent-wash:   #241419;
+    --accent-line:   #3d2229;
+    --invert-bg:     #24395c;
+    --invert-text:   #ffffff;
+    --invert-muted:  #c3cfe4;
+    --invert-line:   #3b5580;
     --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
   }
 }
@@ -113,11 +119,25 @@ p:last-child { margin-bottom: 0; }
 .section--tight  { padding-block: var(--space-7); }
 .section--subtle { background: var(--bg-subtle); }
 
-/* 強調帶：用主色極淡的底，把聯絡區從一般段落裡拉出來 */
+/* 強調帶：用主色極淡的底 */
 .section--accent {
   background: var(--accent-wash);
   border-block: 1px solid var(--accent-line);
 }
+
+/* 反白區塊（原站的聯絡區是深藍底白字）。在區塊內重新定義色票，
+   裡面的元件不必知道自己被放在深色底上，照常用 var() 就對了。 */
+.section--invert {
+  background: var(--invert-bg);
+  --text: var(--invert-text);
+  --text-muted: var(--invert-muted);
+  --border: var(--invert-line);
+  --bg: var(--invert-bg);
+  color: var(--invert-text);
+}
+.section--invert .contact-list__label { color: var(--invert-muted); }
+.section--invert a { color: #fff; text-decoration-color: rgb(255 255 255 / .5); }
+.section--invert a:hover { color: #fff; text-decoration-color: #fff; }
 
 .prose { max-width: var(--measure); }
 .prose--center { margin-inline: auto; text-align: center; }
@@ -522,3 +542,10 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .social-row a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .site-footer .social-row { margin: 0; }
 @media (prefers-reduced-motion: reduce) { .social-row a:hover { transform: none; } }
+
+/* 自介右欄最上方的社群列（對齊原站位置） */
+.profile__side .social-row { margin: 0 0 var(--space-5); }
+.section--invert .social-row a {
+  border-color: var(--invert-line); background: transparent; color: #fff;
+}
+.section--invert .social-row a:hover { background: #fff; color: var(--invert-bg); }

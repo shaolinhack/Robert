@@ -221,17 +221,17 @@
           "href": "mailto:shaolinhack@gmail.com"
         },
         {
+          "label": "Website",
+          "value": "jihwei.org",
+          "href": "https://jihwei.org"
+        },
+        {
           "label": "Podcast",
           "value": "讀癮",
           "href": "https://podcasts.apple.com/us/podcast/%E8%AE%80%E7%99%AE/id1662758348"
-        },
-        {
-          "label": "Medium",
-          "value": "@shaolinhack",
-          "href": "https://medium.com/@shaolinhack"
         }
       ],
-      "background": "accent"
+      "background": "invert"
     }
   ]
 }
