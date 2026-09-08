@@ -152,7 +152,7 @@ const blocks = {
       )
       .join('\n      ');
 
-    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
   <div class="container">
     <div class="prose"><h2>${escapeHtml(b.title ?? 'BRAND')}</h2></div>
     <ul class="logos">
@@ -177,7 +177,7 @@ const blocks = {
       })
       .join('\n      ');
 
-    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
   <div class="container">
     <div class="prose"><h2>${escapeHtml(b.title ?? 'EXPERIENCE')}</h2></div>
     <ul class="experience">
@@ -189,7 +189,7 @@ const blocks = {
 
   /** 純文字段落 */
   prose(b) {
-    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
   <div class="container">
     <div class="prose${b.align === 'center' ? ' prose--center' : ''}">
       ${eyebrow(b.eyebrow)}
@@ -204,7 +204,7 @@ const blocks = {
   /** 圖文並排 */
   split(b) {
     return `<section class="section split${b.mediaPosition === 'right' ? ' split--media-right' : ''}${
-      b.background === 'subtle' ? ' section--subtle' : ''
+      b.background ? ` section--${b.background}` : ''
     }">
   <div class="container">
     <div class="split__grid">
@@ -236,7 +236,7 @@ const blocks = {
       })
       .join('\n    ');
 
-    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
   <div class="container">
     <div class="prose${b.align === 'center' ? ' prose--center' : ''}">
       ${eyebrow(b.eyebrow)}
@@ -261,7 +261,7 @@ const blocks = {
       )
       .join('\n    ');
 
-    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
   <div class="container">
     <div class="prose">
       ${eyebrow(b.eyebrow)}
@@ -316,7 +316,7 @@ const blocks = {
     </div>`
       : '';
 
-    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
   <div class="container">
     <div class="prose prose--center">
       ${eyebrow(b.eyebrow)}
@@ -343,7 +343,7 @@ const blocks = {
       )
       .join('\n      ');
 
-    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
   <div class="container">
     <div class="prose${b.align === 'center' ? ' prose--center' : ''}">
       ${eyebrow(b.eyebrow)}
@@ -371,7 +371,7 @@ const blocks = {
       })
       .join('\n      ');
 
-    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
   <div class="container">
     <div class="prose">
       ${eyebrow(b.eyebrow)}

@@ -16,6 +16,8 @@
   --accent:        #1f6feb;
   --accent-hover:  #1a5fd0;
   --accent-text:   #ffffff;
+  --accent-wash:   #eef4ff;
+  --accent-line:   #d3e2fb;
 
   /* 字體 */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto,
@@ -46,6 +48,8 @@
     --accent:        #5b9cff;
     --accent-hover:  #7db0ff;
     --accent-text:   #0f1115;
+    --accent-wash:   #151d2c;
+    --accent-line:   #26344d;
     --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
   }
 }
@@ -105,6 +109,12 @@ p:last-child { margin-bottom: 0; }
 @media (min-width: 768px) { .section { padding-block: var(--space-9); } }
 .section--tight  { padding-block: var(--space-7); }
 .section--subtle { background: var(--bg-subtle); }
+
+/* 強調帶：用主色極淡的底，把聯絡區從一般段落裡拉出來 */
+.section--accent {
+  background: var(--accent-wash);
+  border-block: 1px solid var(--accent-line);
+}
 
 .prose { max-width: var(--measure); }
 .prose--center { margin-inline: auto; text-align: center; }
@@ -407,7 +417,17 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 .logos__item { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; }
-.logos__item img { max-height: 76px; width: auto; object-fit: contain; }
+
+/* 品牌標誌多半是深色去背圖，直接放在深色底上會整個消失。
+   一律墊一塊白底卡片，兩種模式下都看得清楚，也讓混色的標誌看起來一致。 */
+/* 底板尺寸固定，一整排才會像同一組物件；標誌本身用 contain 置中，
+   不論原圖是寬是高都不會變形。 */
+.logos__item img {
+  width: 100%; max-width: 210px; height: 108px;
+  object-fit: contain; object-position: center;
+  background: #fff; padding: 18px 24px; border-radius: var(--radius-lg);
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+}
 .logos__label { color: var(--text-muted); font-size: .9375rem; }
 
 /* ── 經歷 ───────────────────────────────────────────────── */

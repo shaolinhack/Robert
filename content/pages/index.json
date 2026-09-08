@@ -45,7 +45,6 @@
     {
       "type": "icon-grid",
       "title": "HOBBIES & INTERESTS",
-      "background": "subtle",
       "items": [
         {
           "label": "Read",
@@ -111,7 +110,8 @@
           "label": "Aerobics",
           "icon": "heart-pulse"
         }
-      ]
+      ],
+      "background": "subtle"
     },
     {
       "type": "logos",
@@ -150,12 +150,12 @@
           "label": "Time Management",
           "icon": "clock"
         }
-      ]
+      ],
+      "background": "subtle"
     },
     {
       "type": "experience",
       "title": "EXPERIENCE",
-      "background": "subtle",
       "items": [
         {
           "role": "海密／展旭水電・耀光機電",
@@ -181,12 +181,12 @@
       "filter": true,
       "body": [
         "點上方年份可以只看該年的紀錄。"
-      ]
+      ],
+      "background": "subtle"
     },
     {
       "type": "contact",
       "title": "QUICK ID",
-      "background": "subtle",
       "items": [
         {
           "label": "Email",
@@ -203,7 +203,8 @@
           "value": "@shaolinhack",
           "href": "https://medium.com/@shaolinhack"
         }
-      ]
+      ],
+      "background": "accent"
     }
   ]
 }
