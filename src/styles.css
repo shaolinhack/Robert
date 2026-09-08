@@ -355,9 +355,13 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .cover__stage { position: relative; }
 .cover__bg { position: relative; height: clamp(260px, 42vw, 460px); overflow: hidden; }
 .cover__bg img { width: 100%; height: 100%; object-fit: cover; object-position: center 38%; }
+/* 上下漸層讓整張照片壓暗，再疊一層中央暗角 —— 背景照的中間可能是淺色
+   （椅背、牆面），白色 Logo 疊上去會糊掉，暗角保證它在任何照片上都讀得到。*/
 .cover__bg::after {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgb(0 0 0 / .45) 0%, rgb(0 0 0 / .25) 55%, rgb(0 0 0 / .5) 100%);
+  background:
+    radial-gradient(ellipse 46% 58% at 50% 46%, rgb(0 0 0 / .5) 0%, rgb(0 0 0 / 0) 70%),
+    linear-gradient(180deg, rgb(0 0 0 / .45) 0%, rgb(0 0 0 / .25) 55%, rgb(0 0 0 / .5) 100%);
 }
 
 .cover__inner {
