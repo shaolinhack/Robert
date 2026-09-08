@@ -84,6 +84,23 @@ async function loadPages() {
   return pages;
 }
 
+/**
+ * 把區塊裡的 source 換成 content/ 底下的實際資料。
+ * 時間軸這種會一直長的內容獨立成資料檔，頁面只要指名要哪一份就好。
+ */
+function resolveData(page, milestones) {
+  const blocks = (page.blocks ?? []).map((block) => {
+    if (block.type !== 'timeline' || !block.source) return block;
+    const items = milestones[block.source];
+    if (!items) {
+      throw new Error(`頁面 ${page.route} 的時間軸找不到資料「${block.source}」，` +
+        `content/milestones.json 裡有：${Object.keys(milestones).filter((k) => !k.startsWith('_')).join('、')}`);
+    }
+    return { ...block, items };
+  });
+  return { ...page, blocks };
+}
+
 function render404(site) {
   return renderPage({
     site,
@@ -171,6 +188,7 @@ async function main() {
   await mkdir(OUT_DIR, { recursive: true });
 
   const site = { ...DEFAULT_SITE, ...((await readJson(path.join(CONTENT_DIR, 'site.json'))) ?? {}) };
+  const milestones = (await readJson(path.join(CONTENT_DIR, 'milestones.json'))) ?? {};
 
   // 1. 快照打底
   const hasSnapshot = await isNonEmptyDir(SNAPSHOT_DIR);
@@ -183,7 +201,7 @@ async function main() {
   // 2. 重寫版覆蓋
   const pages = await loadPages();
   for (const page of pages) {
-    await write(fileFromRoute(page.route), renderPage({ site, page }));
+    await write(fileFromRoute(page.route), renderPage({ site, page: resolveData(page, milestones) }));
   }
 
   // 3. 設計系統與自備素材

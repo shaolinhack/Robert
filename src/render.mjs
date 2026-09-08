@@ -3,6 +3,8 @@
  * 零相依，所以 Docker 建置階段不需要 npm install。
  */
 
+import { icon } from './icons.mjs';
+
 /* ── 工具 ─────────────────────────────────────────────────── */
 
 export function escapeHtml(value) {
@@ -196,6 +198,76 @@ const blocks = {
 </section>`;
   },
 
+  /**
+   * 時間軸。單一時間序由新到舊，左右自動交錯 —— 新增一筆只要加一行資料，
+   * 位置與間距都由版面決定，不必手動排。
+   */
+  timeline(b) {
+    const items = toArray(b.items);
+    const years = [...new Set(items.map((i) => i.date.split('.')[0]))].sort().reverse();
+
+    const list = items
+      .map((item, index) => {
+        const side = index % 2 === 0 ? 'left' : 'right';
+        const sub = toArray(item.items);
+        return `<li class="timeline__item reveal${item.highlight ? ' timeline__item--highlight' : ''}"
+        data-side="${side}" data-year="${escapeHtml(item.date.split('.')[0])}">
+      <span class="timeline__marker"></span>
+      <p class="timeline__date">${escapeHtml(item.date)}</p>
+      <h3 class="timeline__title">${inline(item.title)}</h3>
+      ${sub.length ? `<ul class="timeline__list">${sub.map((x) => `<li>${inline(x)}</li>`).join('')}</ul>` : ''}
+    </li>`;
+      })
+      .join('\n    ');
+
+    const filter = b.filter
+      ? `<div class="timeline-filter" role="group" aria-label="依年份篩選">
+      <button type="button" data-year="all" aria-pressed="true">全部</button>
+      ${years.map((y) => `<button type="button" data-year="${y}" aria-pressed="false">${y} 年</button>`).join('\n      ')}
+    </div>`
+      : '';
+
+    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+  <div class="container">
+    <div class="prose prose--center">
+      ${eyebrow(b.eyebrow)}
+      ${heading(b.title)}
+      ${b.body ? paragraphs(b.body) : ''}
+    </div>
+    ${filter}
+    <ol class="timeline">
+    ${list}
+    </ol>
+    ${b.note ? `<p class="timeline__note">${inline(b.note)}</p>` : ''}
+  </div>
+</section>`;
+  },
+
+  /** 圖示牆（興趣、技能） */
+  'icon-grid'(b) {
+    const items = toArray(b.items)
+      .map(
+        (item) => `<div class="icon-grid__item reveal">
+        <span class="icon-grid__badge">${icon(item.icon, { size: 28 })}</span>
+        <span class="icon-grid__label">${escapeHtml(item.label)}</span>
+      </div>`
+      )
+      .join('\n      ');
+
+    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+  <div class="container">
+    <div class="prose${b.align === 'center' ? ' prose--center' : ''}">
+      ${eyebrow(b.eyebrow)}
+      ${heading(b.title)}
+      ${b.body ? paragraphs(b.body) : ''}
+    </div>
+    <div class="icon-grid">
+      ${items}
+    </div>
+  </div>
+</section>`;
+  },
+
   /** 聯絡資訊 */
   contact(b) {
     const items = toArray(b.items)
@@ -271,6 +343,58 @@ function renderFooter(site) {
   </footer>`;
 }
 
+/**
+ * 頁面行為。刻意寫得很小且不依賴任何函式庫：
+ *   - 捲動淡入。內容預設是看得見的（.no-js），只有在 JS 跑起來之後才轉為
+ *     動畫呈現 —— 這樣即使腳本失效，也絕對不會有讀者看到空白頁面。
+ *   - 時間軸的年份篩選。
+ */
+const BEHAVIOUR_SCRIPT = `<script>
+  document.documentElement.classList.remove('no-js');
+
+  (function () {
+    var targets = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window) || !targets.length) {
+      targets.forEach(function (el) { el.classList.add('is-visible'); });
+      return;
+    }
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    targets.forEach(function (el) { observer.observe(el); });
+  })();
+
+  document.querySelectorAll('.timeline-filter').forEach(function (group) {
+    var timeline = group.parentElement.querySelector('.timeline');
+    if (!timeline) return;
+    group.addEventListener('click', function (event) {
+      var button = event.target.closest('button[data-year]');
+      if (!button) return;
+      var year = button.dataset.year;
+      group.querySelectorAll('button').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b === button));
+      });
+      timeline.querySelectorAll('.timeline__item').forEach(function (item) {
+        item.hidden = year !== 'all' && item.dataset.year !== year;
+      });
+      // 篩選後可見項目的順序變了，左右交錯要重算。
+      // 同時強制顯示：這些項目可能從未進入過視窗、淡入動畫還沒觸發，
+      // 篩選後會變成「佔著位置卻看不見」，在時間軸上留下一段空白。
+      var visible = 0;
+      timeline.querySelectorAll('.timeline__item').forEach(function (item) {
+        if (item.hidden) return;
+        item.dataset.side = visible % 2 === 0 ? 'left' : 'right';
+        item.classList.add('is-visible');
+        visible++;
+      });
+    });
+  });
+<\/script>`;
+
 export function renderPage({ site, page }) {
   const title = page.route === '/' ? site.title : `${page.title} — ${site.title}`;
   const description = page.description ?? site.description ?? '';
@@ -299,7 +423,7 @@ export function renderPage({ site, page }) {
   ].filter(Boolean).join('\n  ');
 
   return `<!doctype html>
-<html lang="${escapeHtml(site.lang ?? 'zh-Hant')}">
+<html lang="${escapeHtml(site.lang ?? 'zh-Hant')}" class="no-js">
 <head>
   ${head}
 </head>
@@ -318,6 +442,8 @@ ${body}
   </main>
 
   ${renderFooter(site)}
+
+  ${BEHAVIOUR_SCRIPT}
 </body>
 </html>
 `;

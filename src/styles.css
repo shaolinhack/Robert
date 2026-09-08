@@ -243,3 +243,106 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .site-footer a { color: var(--text-muted); }
 .site-footer a:hover { color: var(--accent); }
 .social { display: flex; gap: var(--space-4); list-style: none; margin: 0; padding: 0; }
+
+/* ── 時間軸 ─────────────────────────────────────────────────
+   單一時間序，左右自動交錯。手機版收成單欄靠左，中線移到最左邊。
+   ───────────────────────────────────────────────────────── */
+
+.timeline {
+  list-style: none; margin: var(--space-7) 0 0; padding: 0;
+  position: relative; display: grid; gap: var(--space-5);
+}
+
+/* 中軸線 */
+.timeline::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 11px;
+  width: 2px; background: var(--border); border-radius: 1px;
+}
+
+.timeline__item { position: relative; padding-left: 40px; }
+
+.timeline__marker {
+  position: absolute; left: 4px; top: 6px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--bg); border: 3px solid var(--accent);
+}
+.timeline__item--highlight .timeline__marker { background: var(--accent); }
+
+.timeline__date {
+  font-size: .8125rem; font-weight: 700; letter-spacing: .06em;
+  color: var(--accent); margin: 0 0 var(--space-1);
+  font-variant-numeric: tabular-nums;
+}
+.timeline__title { font-size: 1.0625rem; margin: 0; line-height: 1.45; }
+.timeline__list {
+  margin: var(--space-2) 0 0; padding-left: 1.15em;
+  color: var(--text-muted); font-size: .9375rem;
+}
+.timeline__list li { margin: var(--space-1) 0; }
+
+@media (min-width: 820px) {
+  .timeline { gap: 0; }
+  .timeline::before { left: 50%; transform: translateX(-50%); }
+  .timeline__item {
+    width: 50%; padding-left: 0; padding-block: var(--space-3);
+  }
+  /* 交錯：奇數項靠左、偶數項靠右 */
+  .timeline__item[data-side="left"]  { padding-right: 36px; text-align: right; }
+  .timeline__item[data-side="right"] { margin-left: 50%; padding-left: 36px; }
+
+  .timeline__item[data-side="left"] .timeline__marker  { left: auto; right: -8px; }
+  .timeline__item[data-side="right"] .timeline__marker { left: -8px; }
+  .timeline__item[data-side="left"] .timeline__list {
+    padding-left: 0; padding-right: 1.15em; list-style-position: inside;
+  }
+}
+
+/* 年份篩選 */
+.timeline-filter {
+  display: flex; flex-wrap: wrap; gap: var(--space-2);
+  margin-top: var(--space-5); justify-content: center;
+}
+.timeline-filter button {
+  appearance: none; cursor: pointer; font: inherit; font-size: .875rem;
+  padding: 5px 14px; border-radius: 999px;
+  border: 1px solid var(--border); background: transparent; color: var(--text-muted);
+  transition: color .15s, border-color .15s;
+}
+.timeline-filter button:hover { color: var(--text); border-color: var(--accent); }
+.timeline-filter button[aria-pressed="true"] {
+  color: var(--accent-text); background: var(--accent); border-color: var(--accent); font-weight: 600;
+}
+.timeline-filter button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.timeline__note { text-align: center; color: var(--text-muted); font-size: .875rem; margin-top: var(--space-5); }
+
+/* ── 圖示牆 ─────────────────────────────────────────────── */
+
+.icon-grid {
+  display: grid; gap: var(--space-5); margin-top: var(--space-6);
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+}
+.icon-grid__item {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+  text-align: center;
+}
+.icon-grid__badge {
+  display: grid; place-items: center; width: 62px; height: 62px;
+  border-radius: 16px; background: var(--bg-inset); color: var(--accent);
+  transition: background-color .18s, color .18s, transform .18s;
+}
+.icon-grid__item:hover .icon-grid__badge {
+  background: var(--accent); color: var(--accent-text); transform: translateY(-3px);
+}
+.icon-grid__label { font-size: .875rem; color: var(--text-muted); }
+
+/* ── 捲動淡入 ───────────────────────────────────────────── */
+
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .55s ease, transform .55s ease; }
+.reveal.is-visible { opacity: 1; transform: none; }
+
+/* 不支援 JS 或使用者不要動畫時，直接顯示 —— 內容永遠不會因為動畫而看不到 */
+.no-js .reveal { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .icon-grid__item:hover .icon-grid__badge { transform: none; }
+}
