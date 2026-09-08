@@ -98,6 +98,95 @@ const blocks = {
 </section>`;
   },
 
+  /** 首屏封面：背景照 + Logo + 頭像 */
+  cover(b) {
+    // 疊圖層要單獨包一層 stage：直接貼齊 .cover 的話，會連姓名那一段的高度
+    // 一起算進去，頭像的位置就會往下跑而壓到姓名。
+    return `<section class="cover">
+  <div class="cover__stage">
+    ${b.background?.src ? `<div class="cover__bg">${image({ ...b.background, eager: true })}</div>` : ''}
+    <div class="container cover__inner">
+      ${b.logo?.src ? `<div class="cover__logo">${image({ ...b.logo, eager: true })}</div>` : ''}
+      ${b.tagline ? `<p class="cover__tagline">${escapeHtml(b.tagline)}</p>` : ''}
+    </div>
+    ${b.avatar?.src ? `<div class="cover__avatar">${image({ ...b.avatar, eager: true })}</div>` : ''}
+  </div>
+  ${b.name ? `<h1 class="cover__name">${inline(b.name)}</h1>` : ''}
+</section>`;
+  },
+
+  /** 自介：左側敘述，右側身份與社群 */
+  profile(b) {
+    const highlights = toArray(b.highlights)
+      .map((x) => `<li>${inline(x)}</li>`)
+      .join('\n        ');
+    const roles = toArray(b.roles)
+      .map((x) => `<li>${inline(x)}</li>`)
+      .join('\n        ');
+
+    return `<section class="section">
+  <div class="container">
+    <div class="prose"><h2>${escapeHtml(b.title ?? 'ABOUT ME')}</h2></div>
+    <div class="profile">
+      <div class="profile__bio reveal">
+        ${paragraphs(b.body)}
+      </div>
+      <div class="profile__side reveal">
+        ${highlights ? `<ul class="profile__highlights">\n        ${highlights}\n      </ul>` : ''}
+        ${roles ? `<ul class="profile__roles">\n        ${roles}\n      </ul>` : ''}
+        ${b.note ? `<p class="profile__note">${inline(b.note)}</p>` : ''}
+      </div>
+    </div>
+  </div>
+</section>`;
+  },
+
+  /** 品牌標誌列 */
+  logos(b) {
+    const items = toArray(b.items)
+      .map(
+        (item) => `<li class="logos__item reveal">
+        ${image(item)}
+        ${item.label ? `<span class="logos__label">${escapeHtml(item.label)}</span>` : ''}
+      </li>`
+      )
+      .join('\n      ');
+
+    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+  <div class="container">
+    <div class="prose"><h2>${escapeHtml(b.title ?? 'BRAND')}</h2></div>
+    <ul class="logos">
+      ${items}
+    </ul>
+  </div>
+</section>`;
+  },
+
+  /** 經歷 */
+  experience(b) {
+    const items = toArray(b.items)
+      .map((item) => {
+        const org = item.href
+          ? `<a href="${escapeHtml(item.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.org)}</a>`
+          : escapeHtml(item.org ?? '');
+        return `<li class="experience__item reveal">
+        <h3 class="experience__role">${inline(item.role)}</h3>
+        ${org ? `<p class="experience__org">${org}</p>` : ''}
+        <p class="experience__period">${escapeHtml(item.period ?? '')}</p>
+      </li>`;
+      })
+      .join('\n      ');
+
+    return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
+  <div class="container">
+    <div class="prose"><h2>${escapeHtml(b.title ?? 'EXPERIENCE')}</h2></div>
+    <ul class="experience">
+      ${items}
+    </ul>
+  </div>
+</section>`;
+  },
+
   /** 純文字段落 */
   prose(b) {
     return `<section class="section${b.background === 'subtle' ? ' section--subtle' : ''}">
@@ -353,19 +442,35 @@ const BEHAVIOUR_SCRIPT = `<script>
   document.documentElement.classList.remove('no-js');
 
   (function () {
-    var targets = document.querySelectorAll('.reveal');
-    if (!('IntersectionObserver' in window) || !targets.length) {
-      targets.forEach(function (el) { el.classList.add('is-visible'); });
-      return;
-    }
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add('is-visible');
-        observer.unobserve(entry.target);
+    var pending = [].slice.call(document.querySelectorAll('.reveal'));
+    if (!pending.length) return;
+
+    // 掃過一遍，把已經到達視窗下緣的項目顯示出來。
+    // 不用 IntersectionObserver 當唯一機制：快速捲動或按 End 鍵時它會跳過元素，
+    // 那些項目就會永遠停在透明狀態，佔著位置卻看不見。
+    function sweep() {
+      var limit = window.innerHeight + 80;
+      pending = pending.filter(function (el) {
+        if (el.getBoundingClientRect().top > limit) return true;
+        el.classList.add('is-visible');
+        return false;
       });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    targets.forEach(function (el) { observer.observe(el); });
+      if (!pending.length) {
+        window.removeEventListener('scroll', schedule);
+        window.removeEventListener('resize', schedule);
+      }
+    }
+
+    var queued = false;
+    function schedule() {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(function () { queued = false; sweep(); });
+    }
+
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    sweep();
   })();
 
   document.querySelectorAll('.timeline-filter').forEach(function (group) {

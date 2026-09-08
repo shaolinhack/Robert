@@ -1,0 +1,209 @@
+{
+  "title": "蘿蔔先生 Robert Lee",
+  "description": "李日韋（蘿蔔先生）—— 終身學習者、創業實踐家、斜槓人生 SLASH。水電機電事業 CEO、HPX 高雄讀書會總召、Podcast「讀癮」主持人。",
+  "blocks": [
+    {
+      "type": "cover",
+      "background": {
+        "src": "/assets/site/58bc5a_32548fb7b1354840affbd1bea8e6c80e~mv2.jpg",
+        "alt": "工作室一隅"
+      },
+      "logo": {
+        "src": "/assets/site/R%20%E8%98%BF%E8%94%94%E5%85%88%E7%94%9F%20%28%E9%BB%91%E5%BA%95%E7%99%BD%E5%AD%97%29%E9%80%8F%E6%98%8E.png",
+        "alt": "蘿蔔先生"
+      },
+      "tagline": "Business Expert",
+      "avatar": {
+        "src": "/assets/site/01_JPG.jpg",
+        "alt": "李日韋 Robert Lee"
+      },
+      "name": "李日韋　(Robert Lee)"
+    },
+    {
+      "type": "profile",
+      "title": "ABOUT ME",
+      "body": [
+        "高雄人，畢業國立高雄應用科技大學。曾任鴻海／群創，現任營造相關事業。曾多次電腦相關競賽獲獎，另擁有多項不同專業技能，本身具備預防、解決、分析問題的能力。",
+        "求學至今仍不斷自我充實，期許自我成為「終身學習者」。",
+        "少年時取其豐，壯年時取其實，老年時取其精。少年時捨其不能有，壯年時捨其不當有，老年時捨其不必有。"
+      ],
+      "highlights": [
+        "⭐ 終身學習者",
+        "⭐ 創業實踐家",
+        "⭐ 斜槓人生 SLASH"
+      ],
+      "roles": [
+        "🏠 展旭水電｜海密水電｜耀光機電　CEO",
+        "🔷 HPX 高雄讀書會　總召",
+        "🔷 斜槓人生 SLASH　主理人",
+        "🔷 Podcast：讀癮　主持人",
+        "🔷 Facebook：蘿蔔先生｜李日韋 (Robert)",
+        "🔷 Instagram：讀癮　總編輯"
+      ],
+      "note": "歡迎合作邀約，請留言或信件聯繫"
+    },
+    {
+      "type": "icon-grid",
+      "title": "HOBBIES & INTERESTS",
+      "background": "subtle",
+      "items": [
+        {
+          "label": "Read",
+          "icon": "book-open"
+        },
+        {
+          "label": "Invest",
+          "icon": "trending-up"
+        },
+        {
+          "label": "Writing",
+          "icon": "pen-line"
+        },
+        {
+          "label": "Read Club",
+          "icon": "users-round"
+        },
+        {
+          "label": "Photography",
+          "icon": "camera"
+        },
+        {
+          "label": "Theater",
+          "icon": "drama"
+        },
+        {
+          "label": "Cooking",
+          "icon": "chef-hat"
+        },
+        {
+          "label": "Meditation",
+          "icon": "brain"
+        },
+        {
+          "label": "Home Gardening",
+          "icon": "sprout"
+        },
+        {
+          "label": "Piano",
+          "icon": "piano"
+        },
+        {
+          "label": "Jogging",
+          "icon": "footprints"
+        },
+        {
+          "label": "Cycling",
+          "icon": "bike"
+        },
+        {
+          "label": "Swimming",
+          "icon": "waves"
+        },
+        {
+          "label": "Hiking",
+          "icon": "mountain"
+        },
+        {
+          "label": "Workout",
+          "icon": "dumbbell"
+        },
+        {
+          "label": "Aerobics",
+          "icon": "heart-pulse"
+        }
+      ]
+    },
+    {
+      "type": "logos",
+      "title": "BRAND",
+      "items": [
+        {
+          "src": "/assets/site/58bc5a_f137234f4bc04a20878f6147739a93b5~mv2.png",
+          "alt": "蘿蔔先生",
+          "label": "蘿蔔先生"
+        },
+        {
+          "src": "/assets/site/58bc5a_16140979d26b443684310956d594b40f~mv2.png",
+          "alt": "讀癮",
+          "label": "讀癮"
+        },
+        {
+          "src": "/assets/site/58bc5a_07ad045251bf411fb3eaabae63a032fb~mv2.png",
+          "alt": "水電機電事業",
+          "label": "海密水電工程 ｜ 展旭水電工程 ｜ 耀光機電工程"
+        }
+      ]
+    },
+    {
+      "type": "icon-grid",
+      "title": "SKILL",
+      "items": [
+        {
+          "label": "Talk",
+          "icon": "mic"
+        },
+        {
+          "label": "MIS",
+          "icon": "server"
+        },
+        {
+          "label": "Time Management",
+          "icon": "clock"
+        }
+      ]
+    },
+    {
+      "type": "experience",
+      "title": "EXPERIENCE",
+      "background": "subtle",
+      "items": [
+        {
+          "role": "海密／展旭水電・耀光機電",
+          "org": "haimi.com.tw",
+          "period": "2014 – Current"
+        },
+        {
+          "role": "鴻海科技集團 Foxconn",
+          "org": "foxconn.com",
+          "period": "2012 – 2014"
+        },
+        {
+          "role": "InnoLux Corporation",
+          "org": "innolux.com",
+          "period": "2012 – before"
+        }
+      ]
+    },
+    {
+      "type": "timeline",
+      "title": "MILESTONES",
+      "source": "個人",
+      "filter": true,
+      "body": [
+        "點上方年份可以只看該年的紀錄。"
+      ]
+    },
+    {
+      "type": "contact",
+      "title": "QUICK ID",
+      "background": "subtle",
+      "items": [
+        {
+          "label": "Email",
+          "value": "shaolinhack@gmail.com",
+          "href": "mailto:shaolinhack@gmail.com"
+        },
+        {
+          "label": "Podcast",
+          "value": "讀癮",
+          "href": "https://podcasts.apple.com/us/podcast/%E8%AE%80%E7%99%AE/id1662758348"
+        },
+        {
+          "label": "Medium",
+          "value": "@shaolinhack",
+          "href": "https://medium.com/@shaolinhack"
+        }
+      ]
+    }
+  ]
+}
