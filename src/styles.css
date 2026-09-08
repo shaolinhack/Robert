@@ -357,21 +357,22 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
   text-align: center;
 }
 .icon-grid__badge {
-  display: grid; place-items: center; width: 62px; height: 62px;
-  border-radius: 16px; background: var(--blue-wash); color: var(--blue);
-  border: 1px solid var(--blue-line);
-  transition: background-color .18s, color .18s, transform .18s;
+  /* 不加底色，只留線條，跟原站那種乾淨的感覺一致 */
+  display: grid; place-items: center; height: 44px;
+  color: var(--blue);
+  transition: color .18s, transform .18s;
 }
+.icon-grid__badge svg { width: 34px; height: 34px; }
 .icon-grid__item:hover .icon-grid__badge {
-  background: var(--blue); border-color: var(--blue); color: #fff; transform: translateY(-3px);
+  color: var(--blue-hover); transform: translateY(-3px);
 }
 .icon-grid__label { font-size: .875rem; color: var(--text-muted); }
 
 /* 手機固定一列三個，格子才不會忽寬忽窄 */
 @media (max-width: 639px) {
   .icon-grid { grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
-  .icon-grid__badge { width: 54px; height: 54px; border-radius: 14px; }
-  .icon-grid__badge svg { width: 24px; height: 24px; }
+  .icon-grid__badge { height: 38px; }
+  .icon-grid__badge svg { width: 30px; height: 30px; }
   .icon-grid__label { font-size: .8125rem; line-height: 1.4; }
 }
 
