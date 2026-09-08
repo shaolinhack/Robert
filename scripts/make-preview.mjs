@@ -142,6 +142,23 @@ function renderShell(pages, assets) {
   .note strong { color: var(--fg); font-weight: 600; }
 
   nav { display: flex; gap: 2px; padding: 8px 16px 0; overflow-x: auto; scrollbar-width: thin; }
+  .sub {
+    display: flex; gap: 2px; padding: 7px 16px; overflow-x: auto; scrollbar-width: thin;
+    background: var(--bg); border-top: 1px solid var(--line); align-items: center;
+  }
+  .sub-label {
+    flex: none; color: var(--muted); font-size: 12px; padding-right: 6px;
+    letter-spacing: .04em;
+  }
+  .sub button {
+    flex: none; appearance: none; cursor: pointer; border: 1px solid var(--line);
+    border-radius: 999px; padding: 4px 11px; background: var(--chrome);
+    color: var(--muted); font: inherit; font-size: 12.5px; white-space: nowrap;
+    transition: color .12s, border-color .12s;
+  }
+  .sub button:hover { color: var(--fg); border-color: var(--accent); }
+  .sub button[aria-current="true"] { color: var(--accent); border-color: var(--accent); font-weight: 600; }
+  .sub button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   nav button {
     flex: none; appearance: none; cursor: pointer;
     border: 1px solid transparent; border-bottom: none;
@@ -172,7 +189,10 @@ function renderShell(pages, assets) {
     <span class="brand">蘿蔔先生網站</span>
     <span class="note">從 Wix 遷移的靜態快照 · <strong id="count"></strong></span>
   </div>
-  <nav id="tabs" aria-label="頁面"></nav>
+  <nav id="tabs" aria-label="主要頁面"></nav>
+  <div class="sub" id="posts" hidden>
+    <span class="sub-label">部落格文章</span>
+  </div>
   <div class="route" id="route"></div>
 </header>
 
@@ -186,6 +206,7 @@ function renderShell(pages, assets) {
   const tabs = document.getElementById('tabs');
   const view = document.getElementById('view');
   const routeLabel = document.getElementById('route');
+  const postList = document.getElementById('posts');
   document.getElementById('count').textContent = pages.length + ' 個頁面';
 
   // 頁面裡的資源路徑在載入當下才換成 data URI，資源本身只存一份。
@@ -209,10 +230,20 @@ function renderShell(pages, assets) {
 
   function show(route) {
     const page = pages.find(p => p.route === route) ?? pages[0];
+    const isPost = page.route.startsWith('/post/');
     routeLabel.textContent = page.route;
+
     for (const button of tabs.children) {
+      // 看文章時，部落格那個主分頁保持亮著 —— 文章是在部落格底下
+      const active = isPost ? button.dataset.route === '/blog' : button.dataset.route === page.route;
+      button.setAttribute('aria-current', String(active));
+    }
+    for (const button of postList.querySelectorAll('button')) {
       button.setAttribute('aria-current', String(button.dataset.route === page.route));
     }
+
+    // 文章清單只在部落格與文章頁顯示
+    postList.hidden = !(isPost || page.route === '/blog');
     view.srcdoc = inlineAssets(page.html);
   }
 
@@ -237,13 +268,20 @@ function renderShell(pages, assets) {
     });
   });
 
-  for (const page of pages) {
+  // 文章寫在部落格裡，不是跟首頁並列的獨立頁面 —— 分頁列照這個結構分兩層
+  const primary = pages.filter(p => !p.route.startsWith('/post/'));
+  const posts = pages.filter(p => p.route.startsWith('/post/'));
+
+  function addButton(container, page) {
     const button = document.createElement('button');
     button.textContent = page.label;
     button.dataset.route = page.route;
     button.addEventListener('click', () => show(page.route));
-    tabs.appendChild(button);
+    container.appendChild(button);
   }
+  for (const page of primary) addButton(tabs, page);
+  for (const page of posts) addButton(postList, page);
+
   show('/');
 </script>
 `;
