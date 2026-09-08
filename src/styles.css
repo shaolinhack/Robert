@@ -31,6 +31,12 @@
   --blue-wash:     #e4eaf4;
   --blue-line:     #b9c8de;
 
+  /* 頁首固定深色：標誌是白字去背圖，白底會整個看不見 */
+  --header-bg:     #10141f;
+  --header-text:   #ffffff;
+  --header-muted:  #b9c2d4;
+  --header-line:   #2a3242;
+
   /* 品牌標誌帶永遠白底：深色去背的標誌在深色模式會整個消失 */
   --brand-band:    #ffffff;
   --brand-text:    #131a2b;
@@ -165,9 +171,10 @@ p:last-child { margin-bottom: 0; }
 
 .site-header {
   position: sticky; top: 0; z-index: 50;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  background: color-mix(in srgb, var(--header-bg) 95%, transparent);
   backdrop-filter: saturate(180%) blur(12px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--header-line);
+  color: var(--header-text);
 }
 .site-header__inner {
   display: flex; align-items: center; justify-content: space-between;
@@ -175,28 +182,30 @@ p:last-child { margin-bottom: 0; }
 }
 .site-brand {
   font-weight: 700; font-size: 1.0625rem; letter-spacing: -0.01em;
-  color: var(--text); text-decoration: none;
+  color: var(--header-text); text-decoration: none;
 }
 .site-brand img { max-height: 36px; width: auto; }
 
 .site-nav ul { display: flex; gap: var(--space-5); list-style: none; margin: 0; padding: 0; }
 .site-nav a {
-  color: var(--text-muted); text-decoration: none; font-size: .9375rem; font-weight: 500;
+  color: var(--header-muted); text-decoration: none; font-size: .9375rem; font-weight: 500;
 }
-.site-nav a:hover, .site-nav a[aria-current="page"] { color: var(--text); }
+.site-nav a[aria-current="page"] { color: var(--header-text); }
+@media (hover: hover) { .site-nav a:hover { color: var(--header-text); } }
 
 /* 手機版選單：純 CSS，不需要 JavaScript */
 .nav-toggle { display: none; }
 .nav-toggle__label {
   display: none; cursor: pointer; padding: var(--space-2);
-  color: var(--text); border: 1px solid var(--border); border-radius: var(--radius);
+  color: var(--header-text); border: 1px solid var(--header-line); border-radius: var(--radius);
   line-height: 1;
 }
 @media (max-width: 719px) {
   .nav-toggle__label { display: inline-flex; }
   .site-nav {
     display: none; position: absolute; inset-inline: 0; top: 100%;
-    background: var(--bg); border-bottom: 1px solid var(--border); padding: var(--space-4) var(--space-5);
+    background: var(--header-bg); border-bottom: 1px solid var(--header-line);
+    padding: var(--space-4) var(--space-5);
   }
   .nav-toggle:checked ~ .site-nav { display: block; }
   .site-nav ul { flex-direction: column; gap: var(--space-4); }
