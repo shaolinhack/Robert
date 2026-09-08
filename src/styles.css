@@ -4,7 +4,8 @@
    ───────────────────────────────────────────────────────────── */
 
 :root {
-  color-scheme: light dark;
+  /* 整站固定淺色 —— 配色是依品牌色設計的，不跟著系統切換 */
+  color-scheme: light;
 
   /* 色彩 —— 淺色模式 */
   --bg:            #ffffff;
@@ -47,36 +48,7 @@
   --shadow: 0 1px 2px rgb(0 0 0 / .04), 0 8px 24px -12px rgb(0 0 0 / .12);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg:            #0e1420;
-    --bg-subtle:     #161d2c;
-    --bg-inset:      #1e2739;
-    --text:          #e9edf5;
-    --text-muted:    #a2abbf;
-    --border:        #28324a;
-    --accent:        #ff6b78;
-    --accent-hover:  #ff8f99;
-    --accent-text:   #0e1420;
-    --accent-wash:   #24151a;
-    --accent-line:   #3d232b;
-    --invert-bg:     #1d2f4d;
-    --invert-text:   #ffffff;
-    --invert-muted:  #c6d2e6;
-    --invert-line:   #35496e;
-    --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
-  }
-}
-
-/* ── 基礎 ───────────────────────────────────────────────────── */
-
 *, *::before, *::after { box-sizing: border-box; }
-
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-}
 
 body {
   margin: 0;
