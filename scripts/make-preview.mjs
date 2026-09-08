@@ -177,7 +177,10 @@ function renderShell(pages, assets) {
 
   .route { padding: 0 16px 9px; color: var(--muted); font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 
-  main { flex: 1; min-height: 0; padding: 12px 16px 16px; }
+  main { flex: 1; min-height: 0; padding: 12px 16px 16px; position: relative; }
+  body[data-busy="true"] { cursor: progress; }
+  body[data-busy="true"] iframe { opacity: .45; }
+  iframe { transition: opacity .15s; }
   iframe {
     width: 100%; height: 100%; border: 1px solid var(--line);
     border-radius: 10px; background: #fff; display: block;
@@ -198,40 +201,81 @@ function renderShell(pages, assets) {
 
 <main><iframe id="view" title="網站預覽"></iframe></main>
 
-<script type="application/json" id="pages">${embedJson(pages)}</script>
+<script type="application/json" id="index">${embedJson(
+    pages.map((p, i) => ({ route: p.route, label: p.label, id: 'page-' + i }))
+  )}</script>
+${pages.map((p, i) => `<script type="application/json" id="page-${i}">${embedJson(p.html)}</script>`).join('\n')}
 <script type="application/json" id="assets">${embedJson(assets)}</script>
 <script>
-  const pages = JSON.parse(document.getElementById('pages').textContent);
-  const assets = JSON.parse(document.getElementById('assets').textContent);
+  // 索引很小，先解析它把分頁列畫出來，介面立刻可用。
+  // 頁面內容與資源總共約 9 MB，一次全解析會讓瀏覽器凍住好幾秒，
+  // 所以延後到真正需要時才做，並且解析過就快取起來。
+  const pages = JSON.parse(document.getElementById('index').textContent);
+  const htmlCache = new Map();
+  let replacements = null;
+
+  function pageHtml(page) {
+    if (!htmlCache.has(page.id)) {
+      htmlCache.set(page.id, JSON.parse(document.getElementById(page.id).textContent));
+    }
+    return htmlCache.get(page.id);
+  }
+
+  /**
+   * data URI 轉成 blob URL。直接把 data URI 塞進 HTML 會讓 420 KB 的頁面
+   * 膨脹成 1.5 MB，每次換頁都要建出這麼大的字串再讓瀏覽器重新解析一次。
+   * blob URL 只有幾十個字元，頁面大小幾乎不變，換頁快很多。
+   * 少數環境不允許 blob，因此失敗時退回原本的 data URI。
+   */
+  function toBlobUrl(dataUri) {
+    try {
+      const [header, base64] = dataUri.split(',');
+      const mime = header.slice(5, header.indexOf(';'));
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return URL.createObjectURL(new Blob([bytes], { type: mime }));
+    } catch {
+      return dataUri;
+    }
+  }
+
+  function assetReplacements() {
+    if (replacements) return replacements;
+    const assets = JSON.parse(document.getElementById('assets').textContent);
+    replacements = [];
+    for (const [name, uri] of Object.entries(assets)) {
+      const url = toBlobUrl(uri);
+      for (const form of new Set([name, encodeURI(name), encodeURIComponent(name)])) {
+        replacements.push(['/assets/site/' + form, url]);
+      }
+    }
+    replacements.sort((a, b) => b[0].length - a[0].length);
+    return replacements;
+  }
   const tabs = document.getElementById('tabs');
   const view = document.getElementById('view');
   const routeLabel = document.getElementById('route');
   const postList = document.getElementById('posts');
   document.getElementById('count').textContent = pages.length + ' 個頁面';
 
-  // 頁面裡的資源路徑在載入當下才換成 data URI，資源本身只存一份。
-  // 用已知檔名逐一比對，而不是用正則猜網址結尾 —— 檔名可能含空白與括號
-  // （例如「R 蘿蔔先生 (黑底白字)透明.png」），猜邊界一定會切錯。
-  const replacements = [];
-  for (const [name, uri] of Object.entries(assets)) {
-    for (const form of new Set([name, encodeURI(name), encodeURIComponent(name)])) {
-      replacements.push(['/assets/site/' + form, uri]);
-    }
-  }
-  replacements.sort((a, b) => b[0].length - a[0].length);
-
+  // 資源路徑用已知檔名逐一比對，而不是用正則猜網址結尾 —— 檔名可能含空白與
+  // 括號（例如「R 蘿蔔先生 (黑底白字)透明.png」），猜邊界一定會切錯。
   function inlineAssets(html) {
     let out = html;
-    for (const [needle, uri] of replacements) {
+    for (const [needle, uri] of assetReplacements()) {
       if (out.includes(needle)) out = out.split(needle).join(uri);
     }
     return out;
   }
 
+  let pending = false;
+
   function show(route) {
+    if (pending) return;
     const page = pages.find(p => p.route === route) ?? pages[0];
     const isPost = page.route.startsWith('/post/');
-    routeLabel.textContent = page.route;
+    routeLabel.textContent = page.route + ' · 載入中…';
 
     for (const button of tabs.children) {
       // 看文章時，部落格那個主分頁保持亮著 —— 文章是在部落格底下
@@ -244,7 +288,16 @@ function renderShell(pages, assets) {
 
     // 文章清單只在部落格與文章頁顯示
     postList.hidden = !(isPost || page.route === '/blog');
-    view.srcdoc = inlineAssets(page.html);
+
+    // 先讓瀏覽器把「載入中」畫出來，再做內嵌資源這件重活
+    pending = true;
+    document.body.dataset.busy = 'true';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      view.srcdoc = inlineAssets(pageHtml(page));
+      routeLabel.textContent = page.route;
+      document.body.dataset.busy = 'false';
+      pending = false;
+    }));
   }
 
   // 站內連結攔下來換頁，站外的另開分頁
