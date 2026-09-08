@@ -7,16 +7,25 @@ npm run import   # inbox/ → snapshot/
 npm run build    # snapshot/ + content/ → public/
 ```
 
-每個頁面會有兩樣東西，**兩個都要放進來**：
+## 怎麼放
+
+每個頁面會有**兩樣東西，都要放進來**：`頁面.html` 和同名的 `頁面_files/` 資料夾。
+
+**資料夾層數不拘**，匯入時會遞迴尋找所有 HTML。所以直接把 ZIP 解壓進來就行，
+多包一層也沒關係：
 
 ```
 inbox/
-├── Robert.html          ← 網頁檔
-├── Robert_files/        ← 同名資料夾，裡面是所有圖片與 CSS
-├── 關於我.html
-├── 關於我_files/
-└── routes.json          ← 可選：指定每個檔案對應的網址
+├── 網站備份/              ← 解壓後多出來的一層，沒問題
+│   ├── Robert.html
+│   ├── Robert_files/
+│   ├── 關於我.html
+│   └── 關於我_files/
+└── routes.json
 ```
+
+唯一的要求是：**`_files` 資料夾必須和它的 `.html` 在同一層**。這是 Chrome 存檔
+的原始結構，不要去搬動它。
 
 ## routes.json
 
@@ -38,3 +47,8 @@ inbox/
 - 移除所有 `<script>`（保留 JSON-LD 結構化資料）與追蹤像素
 - 排除 `.js` 檔案 —— 腳本已移除，Wix 的 bundle 只是死重量
 - 把頁面之間的連結（`關於我.html`）改成網站路由（`/about`）
+
+## 會擋下來的狀況
+
+- **HTML 引用了 `_files` 資料夾但找不到** → 印出警告，指出圖片會全部破掉
+- **兩個頁面對應到同一個網址** → 直接報錯，不會安靜地覆蓋掉其中一頁
