@@ -391,10 +391,25 @@ const blocks = {
       })
       .join('\n    ');
 
+    // 年份可以逐年列，也可以照 filterGroups 分成區間 —— 年份一多，
+    // 一年一顆按鈕會排滿整列反而難挑。
+    const groups = toArray(b.filterGroups);
+    const buttons = groups.length
+      ? groups
+          .map(
+            (g) =>
+              `<button type="button" data-from="${g.from}" data-to="${g.to}" aria-pressed="false">` +
+              `${escapeHtml(g.label)}</button>`
+          )
+          .join('\n      ')
+      : years
+          .map((y) => `<button type="button" data-from="${y}" data-to="${y}" aria-pressed="false">${y} 年</button>`)
+          .join('\n      ');
+
     const filter = b.filter
       ? `<div class="timeline-filter" role="group" aria-label="依年份篩選">
-      <button type="button" data-year="all" aria-pressed="true">全部</button>
-      ${years.map((y) => `<button type="button" data-year="${y}" aria-pressed="false">${y} 年</button>`).join('\n      ')}
+      <button type="button" data-all="true" aria-pressed="true">全部</button>
+      ${buttons}
     </div>`
       : '';
 
@@ -637,14 +652,17 @@ const BEHAVIOUR_SCRIPT = `<script>
     var timeline = group.parentElement.querySelector('.timeline');
     if (!timeline) return;
     group.addEventListener('click', function (event) {
-      var button = event.target.closest('button[data-year]');
+      var button = event.target.closest('button');
       if (!button) return;
-      var year = button.dataset.year;
+      var all = button.dataset.all === 'true';
+      var from = Number(button.dataset.from);
+      var to = Number(button.dataset.to);
       group.querySelectorAll('button').forEach(function (b) {
         b.setAttribute('aria-pressed', String(b === button));
       });
       timeline.querySelectorAll('.timeline__item').forEach(function (item) {
-        item.hidden = year !== 'all' && item.dataset.year !== year;
+        var year = Number(item.dataset.year);
+        item.hidden = !all && (year < from || year > to);
       });
       // 篩選後可見項目的順序變了，左右交錯要重算。
       // 同時強制顯示：這些項目可能從未進入過視窗、淡入動畫還沒觸發，

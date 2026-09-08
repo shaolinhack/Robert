@@ -9,20 +9,25 @@
   /* 色彩 —— 淺色模式 */
   --bg:            #ffffff;
   --bg-subtle:     #edeff5;
-  --bg-inset:      #e2e6f0;
-  --text:          #070a0e;
-  --text-muted:    #5b6472;
-  --border:        #d8dde8;
-  /* 以下三色直接取自原站：強調紅、淺灰底、聯絡區深藍 */
+  --bg-inset:      #e1e6f0;
+  --text:          #131a2b;
+  --text-muted:    #5a6478;
+  --border:        #dce1ed;
+  /* 整套配色由原站的三個色推導：紅 #df3143、灰藍 #edeff5、深藍 #2e4975。
+     中性色帶一點藍調，跟深藍帶是同一個色系，不會像另外拼上去的。 */
   --accent:        #df3143;
   --accent-hover:  #b3212f;
   --accent-text:   #ffffff;
   --accent-wash:   #fdeef0;
-  --accent-line:   #f6d5da;
+  --accent-line:   #f4d3d8;
   --invert-bg:     #2e4975;
   --invert-text:   #ffffff;
-  --invert-muted:  #c3cfe4;
-  --invert-line:   #46608c;
+  --invert-muted:  #c6d2e6;
+  --invert-line:   #47608c;
+  /* 品牌標誌帶永遠白底：深色去背的標誌在深色模式會整個消失 */
+  --brand-band:    #ffffff;
+  --brand-text:    #131a2b;
+  --brand-muted:   #5a6478;
 
   /* 字體 */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto,
@@ -44,21 +49,21 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg:            #0f1218;
-    --bg-subtle:     #161a23;
-    --bg-inset:      #1d222d;
-    --text:          #e8ebf2;
-    --text-muted:    #99a2b3;
-    --border:        #272d3a;
-    --accent:        #ff6b7a;
-    --accent-hover:  #ff8f9a;
-    --accent-text:   #0f1218;
-    --accent-wash:   #241419;
-    --accent-line:   #3d2229;
-    --invert-bg:     #24395c;
+    --bg:            #0e1420;
+    --bg-subtle:     #161d2c;
+    --bg-inset:      #1e2739;
+    --text:          #e9edf5;
+    --text-muted:    #a2abbf;
+    --border:        #28324a;
+    --accent:        #ff6b78;
+    --accent-hover:  #ff8f99;
+    --accent-text:   #0e1420;
+    --accent-wash:   #24151a;
+    --accent-line:   #3d232b;
+    --invert-bg:     #1d2f4d;
     --invert-text:   #ffffff;
-    --invert-muted:  #c3cfe4;
-    --invert-line:   #3b5580;
+    --invert-muted:  #c6d2e6;
+    --invert-line:   #35496e;
     --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
   }
 }
@@ -123,6 +128,15 @@ p:last-child { margin-bottom: 0; }
 .section--accent {
   background: var(--accent-wash);
   border-block: 1px solid var(--accent-line);
+}
+
+/* 品牌帶：不論淺色深色都維持白底，因為標誌是深色去背圖 */
+.section--brand {
+  background: var(--brand-band);
+  --bg: var(--brand-band);
+  --text: var(--brand-text);
+  --text-muted: var(--brand-muted);
+  color: var(--brand-text);
 }
 
 /* 反白區塊（原站的聯絡區是深藍底白字）。在區塊內重新定義色票，
@@ -441,15 +455,11 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 }
 .logos__item { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); text-align: center; }
 
-/* 品牌標誌多半是深色去背圖，直接放在深色底上會整個消失。
-   一律墊一塊白底卡片，兩種模式下都看得清楚，也讓混色的標誌看起來一致。 */
-/* 底板尺寸固定，一整排才會像同一組物件；標誌本身用 contain 置中，
-   不論原圖是寬是高都不會變形。 */
+/* 標誌尺寸固定，一整排才會像同一組物件；用 contain 置中，
+   不論原圖是寬是高都不會變形。整塊帶子永遠白底，所以不需要白色卡片。 */
 .logos__item img {
-  width: 100%; max-width: 210px; height: 108px;
+  width: 100%; max-width: 210px; height: 96px;
   object-fit: contain; object-position: center;
-  background: #fff; padding: 18px 24px; border-radius: var(--radius-lg);
-  border: 1px solid var(--border); box-shadow: var(--shadow);
 }
 .logos__label { color: var(--text-muted); font-size: .9375rem; }
 

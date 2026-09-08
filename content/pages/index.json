@@ -158,12 +158,21 @@
           "alt": "水電機電事業",
           "label": "海密水電工程有限公司\n展旭水電工程有限公司\n​耀光機電工程有限公司"
         }
-      ]
+      ],
+      "background": "brand"
     },
     {
       "type": "icon-grid",
       "title": "SKILL",
       "items": [
+        {
+          "label": "AI & Vibe Coding",
+          "icon": "sparkles"
+        },
+        {
+          "label": "自動化 n8n",
+          "icon": "workflow"
+        },
         {
           "label": "Talk",
           "icon": "mic"
@@ -175,6 +184,18 @@
         {
           "label": "Time Management",
           "icon": "clock"
+        },
+        {
+          "label": "專案管理",
+          "icon": "kanban"
+        },
+        {
+          "label": "品牌經營",
+          "icon": "badge-check"
+        },
+        {
+          "label": "Podcast",
+          "icon": "podcast"
         }
       ],
       "background": "subtle"
@@ -208,7 +229,19 @@
       "body": [
         "點上方年份可以只看該年的紀錄。"
       ],
-      "background": "subtle"
+      "background": "subtle",
+      "filterGroups": [
+        {
+          "label": "111～115 年",
+          "from": 111,
+          "to": 115
+        },
+        {
+          "label": "108～110 年",
+          "from": 108,
+          "to": 110
+        }
+      ]
     },
     {
       "type": "contact",
