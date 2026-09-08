@@ -33,6 +33,22 @@
 
 ## 階段一：抓快照並上線
 
+有兩條路，擇一即可。
+
+### 路線 A — 不用終端機（Chrome 存檔 + GitHub 網頁上傳）
+
+適合不熟指令的情況，不需要安裝任何東西。
+
+1. 用 Chrome 打開網站的每一頁，**先捲到最底**（觸發圖片載入），再按 `Ctrl+S`
+2. 存檔類型選 **「網頁，完整」**，會得到 `頁面.html` 加一個 `頁面_files/` 資料夾
+3. 到 GitHub 這個 repo 的 `inbox/` 資料夾，用 **Add file → Upload files** 把
+   HTML 與 `_files` 資料夾一起拖進去（詳見 [`inbox/README.md`](inbox/README.md)）
+4. 中文檔名需要一併上傳 `inbox/routes.json` 指定每頁的網址
+
+上傳後由維護者執行 `npm run import` 轉成 `snapshot/`，再 `npm run build`。
+
+### 路線 B — 用終端機自動抓（結果較完整）
+
 需求：Node.js 20 以上。
 
 ```bash
@@ -185,12 +201,14 @@ DNS 生效後 Zeabur 自動簽發並續期 Let's Encrypt 憑證。
 │   ├── assets/         #   自備圖片 → /assets/
 │   └── pages/
 │       └── _example.json  # 區塊語法範例，不會被建置
-├── snapshot/           # 階段一：Wix 快照（進版控，capture 產生）
+├── inbox/              # Chrome 存檔的上傳區（給路線 A 用）
+├── snapshot/           # 階段一：Wix 快照（進版控，capture 或 import 產生）
 ├── src/
 │   ├── styles.css      # 設計系統，視覺全由 :root 變數控制
 │   └── render.mjs      # 區塊 → 語意化 HTML（零相依）
 ├── scripts/
-│   ├── capture.mjs     # 抓 Wix 站 → snapshot/
+│   ├── capture.mjs     # 抓 Wix 站 → snapshot/（路線 B）
+│   ├── import-chrome-save.mjs  # inbox/ → snapshot/（路線 A）
 │   ├── build.mjs       # snapshot/ + content/ → public/
 │   ├── audit.mjs       # 掃描殘留的 Wix / 追蹤依賴
 │   └── serve.mjs       # 零相依本機預覽，行為對齊正式環境
