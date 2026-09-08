@@ -6,6 +6,7 @@
   "description": "Robert 個人網站 — 自 Wix 遷移至 Zeabur 的靜態站",
   "scripts": {
     "capture": "node scripts/capture.mjs",
+    "unzip": "node scripts/unpack-zip.mjs",
     "import": "node scripts/import-chrome-save.mjs",
     "build": "node scripts/build.mjs",
     "audit": "node scripts/audit.mjs",

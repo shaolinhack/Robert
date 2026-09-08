@@ -1,41 +1,47 @@
 /**
  * import-chrome-save.mjs — 把 Chrome「網頁，完整」存檔轉成專案的 snapshot/ 格式。
  *
- * 給不方便跑 capture.mjs 的情況用：在 Chrome 按 Ctrl+S 選「網頁，完整」，
- * 會得到 `頁面.html` 加一個 `頁面_files/` 資料夾。把這些放進 inbox/ 後執行：
- *
  *   node scripts/import-chrome-save.mjs [來源目錄]
  *
- * inbox/ 底下可以有任意層資料夾 —— 解壓 ZIP 常常會多包一層，這裡會遞迴尋找
- * 所有 HTML，資源資料夾則以「與該 HTML 同一層的同名資料夾」為準。
+ * inbox/ 底下可以有任意層資料夾（解壓 ZIP 常會多包一層），會遞迴尋找所有 HTML；
+ * 資源資料夾以「與該 HTML 同一層的同名資料夾」為準。
  *
- * 路由對應可放 inbox/routes.json，鍵可用檔名或相對路徑：
- *   { "Robert.html": "/", "關於我.html": "/about" }
- * 沒有這個檔就依檔名自動推斷，無法安全轉成網址時會提出警告。
+ * 路由對應放 inbox/routes.json，鍵可用檔名或相對路徑：
+ *   { "首頁.html": "/", "文章.html": "/post/文章" }
+ * 建議照原網站的網址設定，既有連結與搜尋引擎索引才不會失效。
+ *
+ * 所有頁面的資源會合併到 /assets/site/ 並依內容去重 —— Wix 每頁存檔都會帶一整
+ * 份相同的字型與樣式，不去重的話同樣的檔案會重複十幾份。
  */
 
-import { readdir, readFile, writeFile, mkdir, cp, rm } from 'node:fs/promises';
+import { readdir, readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const INBOX = path.resolve(process.argv[2] || path.join(ROOT, 'inbox'));
 const SNAPSHOT = path.join(ROOT, 'snapshot');
+const ASSET_ROOT = path.join(SNAPSHOT, 'assets', 'site');
+const ASSET_PREFIX = '/assets/site';
 
 const HTML_EXT = /\.x?html?$/i;
 
 /** Chrome 在不同語系用不同的資料夾後綴 */
 const KNOWN_SUFFIXES = ['_files', '_檔案', '_文件', '_fichiers', '_Dateien', '_archivos', '_file'];
 
+/**
+ * 要排除的腳本檔。所有 <script> 都會被移除，這些檔案不會被載入，
+ * 而 Wix 的 bundle 動輒數十 MB。Chrome 會在下載的 JS 後面加語系後綴
+ * （中文是 `.下載`），所以副檔名後面再容許一段。
+ */
+const JS_LIKE = /\.m?js(\.[^.]+)?$/i;
+
 /** HTML 裡引用資源資料夾的樣子，用來判斷「該有資料夾卻找不到」 */
 const ASSET_DIR_REF = /["'(](?:\.\/)?([^"'()/]+?(?:_files|_檔案|_文件|_fichiers|_Dateien|_archivos))\//g;
 
 function slugify(name) {
-  return name
-    .toLowerCase()
-    .replace(/\.[^.]+$/, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+  return name.toLowerCase().replace(/\.[^.]+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
 function routeFromName(basename) {
@@ -46,10 +52,10 @@ function routeFromName(basename) {
 
 function fileFromRoute(route) {
   const slug = route.replace(/^\/+|\/+$/g, '');
-  return slug ? path.join(slug, 'index.html') : 'index.html';
+  return slug ? path.join(...slug.split('/'), 'index.html') : 'index.html';
 }
 
-/** 遞迴找出所有 HTML，但不進入資源資料夾（那裡面的 HTML 不是頁面） */
+/** 遞迴找出所有頁面 HTML，但不進入資源資料夾（那裡面的 HTML 是小工具，不是頁面） */
 async function findHtmlFiles(dir, found = []) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
@@ -67,93 +73,242 @@ async function findHtmlFiles(dir, found = []) {
 async function findAssetDir(htmlPath) {
   const dir = path.dirname(htmlPath);
   const basename = path.basename(htmlPath).replace(HTML_EXT, '');
-  const entries = await readdir(dir, { withFileTypes: true });
-  const dirs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+  const dirs = (await readdir(dir, { withFileTypes: true })).filter((e) => e.isDirectory()).map((e) => e.name);
 
   for (const suffix of KNOWN_SUFFIXES) {
     if (dirs.includes(`${basename}${suffix}`)) return `${basename}${suffix}`;
   }
-  // 退而求其次：任何以檔名開頭的資料夾
   return dirs.find((name) => name !== basename && name.startsWith(basename)) ?? null;
 }
 
-/**
- * 把 `頁面_files/xxx.jpg` 這類相對路徑改寫成 `/assets/<slug>/xxx.jpg`。
- *
- * dirMap 一次帶入所有頁面的資料夾，因為 Chrome 存下的 CSS/HTML 有可能引用到
- * 另一個頁面存檔的資料夾。變體由長到短排序，否則 `./X_files/` 會先被 `X_files/`
- * 咬掉一半，留下 `.//assets/...`。
- */
-function rewriteAssetPaths(text, dirMap) {
-  const replacements = [];
-
-  for (const [dirName, publicPrefix] of dirMap) {
-    for (const variant of new Set([
-      `./${dirName}/`,
-      `${dirName}/`,
-      `./${encodeURIComponent(dirName)}/`,
-      `${encodeURIComponent(dirName)}/`,
-      `${dirName.replace(/ /g, '%20')}/`,
-    ])) {
-      replacements.push([variant, `${publicPrefix}/`]);
-    }
+/** 列出資料夾內所有檔案，回傳相對於該資料夾的路徑 */
+async function listFiles(dir, base = dir, found = []) {
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) await listFiles(full, base, found);
+    else found.push(path.relative(base, full).split(path.sep).join('/'));
   }
-
-  replacements.sort((a, b) => b[0].length - a[0].length);
-
-  let out = text;
-  for (const [needle, value] of replacements) {
-    if (out.includes(needle)) out = out.split(needle).join(value);
-  }
-  return out;
+  return found;
 }
 
 /** 移除 Wix 的執行期腳本與追蹤碼，保留 JSON-LD */
 function stripScripts(html) {
   return html
-    .replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi, (match, attrs) =>
-      /application\/ld\+json/i.test(attrs) ? match : ''
+    .replace(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi, (m, attrs) =>
+      /application\/ld\+json/i.test(attrs) ? m : ''
     )
     .replace(/<script\b[^>]*\/>/gi, '')
     .replace(/<link\b[^>]*rel=["'](?:preload|prefetch|modulepreload)["'][^>]*>/gi, '')
     .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, '');
 }
 
-/** 把指向其他存檔頁面的連結改成本站路由 */
-function rewritePageLinks(html, pageRoutes) {
-  let out = html;
-  for (const [filename, route] of pageRoutes) {
-    for (const variant of [filename, `./${filename}`, encodeURIComponent(filename)]) {
-      out = out.split(`href="${variant}"`).join(`href="${route}"`);
-      out = out.split(`href='${variant}'`).join(`href='${route}'`);
-    }
+/** 依序套用替換 */
+function applyReplacements(text, replacements) {
+  let out = text;
+  for (const [needle, value] of replacements) {
+    if (needle && out.includes(needle)) out = out.split(needle).join(value);
   }
   return out;
 }
 
+/** 長的優先，避免 `./X_files/` 被 `X_files/` 咬掉一半 */
+function sortedByLength(pairs) {
+  return [...pairs].sort((a, b) => b[0].length - a[0].length);
+}
+
+/** 從 HTML 取出原始網址（canonical 優先，其次 og:url） */
+function extractOriginalUrl(html) {
+  const canonical = html.match(/<link[^>]*rel=["']canonical["'][^>]*>/i)?.[0];
+  const fromCanonical = canonical?.match(/href=["']([^"']+)["']/i)?.[1];
+  if (fromCanonical) return fromCanonical;
+  const og = html.match(/<meta[^>]*property=["']og:url["'][^>]*>/i)?.[0];
+  return og?.match(/content=["']([^"']+)["']/i)?.[1] ?? null;
+}
+
 /**
- * Chrome 存下的 CSS 多半用同層相對路徑（url(hero.jpg)），檔案搬到
- * /assets/<slug>/ 後仍然解析得到，不用動；這裡只處理指名資料夾的寫法。
+ * 把指向原站的絕對網址換成本站路由。只替換帶引號的完整屬性值 ——
+ * 首頁網址是其他頁網址的前綴，直接做子字串替換會把長網址咬掉一段。
  */
-async function rewriteCssIn(dir, dirMap) {
-  for (const entry of await readdir(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) await rewriteCssIn(full, dirMap);
-    else if (/\.css$/i.test(entry.name)) {
-      const css = await readFile(full, 'utf8');
-      const rewritten = rewriteAssetPaths(css, dirMap);
-      if (rewritten !== css) await writeFile(full, rewritten, 'utf8');
+function pageUrlReplacements(originalUrl, route) {
+  const forms = new Set([originalUrl, originalUrl.replace(/\/$/, '')]);
+  try {
+    forms.add(decodeURI(originalUrl));
+  } catch {}
+
+  const pairs = [];
+  for (const form of forms) {
+    for (const url of [form, `${form}/`]) {
+      pairs.push([`"${url}"`, `"${route}"`], [`'${url}'`, `'${route}'`]);
     }
   }
+  return pairs;
+}
+
+/**
+ * 個別檔案的路徑覆寫。必須連 `./` 前綴的寫法一起產生：覆寫的字串比資料夾前綴長，
+ * 會先被套用，若只處理無前綴的形式，`./X_files/a.png` 會只被換掉後半段而留下
+ * `.//assets/...`。
+ */
+function pushOverride(item, rel, publicPath) {
+  item.overrides.push([`./${item.assetDirName}/${rel}`, publicPath], [`${item.assetDirName}/${rel}`, publicPath]);
+}
+
+/**
+ * Wix 的圖片網址長這樣：
+ *   https://static.wixstatic.com/media/<檔名>/v1/fill/w_792,h_526,…/<顯示名稱>
+ * `/media/` 後面那一段就是 Chrome 存到本機的檔名，所以只要查得到本地檔案，
+ * 整段網址都能換成本地路徑 —— og:image、<source srcset>、JSON-LD 裡的圖片
+ * 一次全部處理掉，不必逐一刪除。
+ *
+ * 本地檔是某個特定尺寸的算圖，拿來對應所有尺寸沒有問題，瀏覽器會自行縮放。
+ */
+function rewriteWixMediaUrls(html, mediaMap) {
+  return html.replace(
+    /https?:\/\/static\.wixstatic\.com\/media\/([^/"'\s)]+)(?:\/[^"'\s)]*)?/gi,
+    (whole, mediaName) => mediaMap.get(mediaName) ?? whole
+  );
+}
+
+/**
+ * 移除指向 Wix 的 srcset —— Chrome 只會把當下顯示的那一張存到本機，
+ * srcset 裡其餘尺寸仍指向 Wix。瀏覽器有 srcset 就會優先採用，
+ * 等於圖片還是從 Wix 載入，Wix 一停就全破。src 已是本地檔案時直接拿掉。
+ */
+function stripRemoteSrcset(html) {
+  // <picture> 裡的 <source> 優先於 <img>，仍指向 Wix 的就整個拿掉，
+  // 讓瀏覽器退回使用 <img> 的本地 src。
+  const withoutSources = html.replace(/<source\b[^>]*>/gi, (tag) =>
+    /wixstatic|parastorage/i.test(tag) ? '' : tag
+  );
+
+  return withoutSources.replace(/<img\b[^>]*>/gi, (tag) => {
+    if (!/\ssrc=["']\/assets\//i.test(tag)) return tag;
+    if (!/wixstatic|parastorage/i.test(tag)) return tag;
+    return tag.replace(/\s(?:srcset|sizes)=["'][^"']*["']/gi, '');
+  });
+}
+
+/** 移除指向 Wix 小工具的 iframe（例如 Wix Chat），這些功能遷移後不可能運作 */
+function stripWidgetIframes(html, widgetPaths) {
+  if (!widgetPaths.size) return html;
+  return html.replace(/<iframe\b[^>]*>(?:[\s\S]*?<\/iframe>)?/gi, (tag) => {
+    const src = tag.match(/src=["']([^"']+)["']/i)?.[1];
+    return src && widgetPaths.has(src.replace(/^\.\//, '')) ? '' : tag;
+  });
+}
+
+/**
+ * 清掉不會產生網路請求、但會讓「還連著 Wix 嗎」的檢查誤報的殘留字串：
+ *   <style data-href="https://static.parastorage.com/…">  CSS 本身是內嵌的，
+ *                                                         這個屬性只是來源註記
+ *   /*# sourceMappingURL=https://… *\/                   只有開發工具會用到
+ */
+function stripDeadMetadata(html) {
+  return html
+    .replace(
+      /\s+data-(?:url|href)=["']https?:\/\/(?:static\.parastorage\.com|static\.wixstatic\.com)[^"']*["']/gi,
+      ''
+    )
+    .replace(/\/\*#\s*sourceMappingURL=[^*]*\*\//gi, '');
+}
+
+/**
+ * 依 id 移除整個元素，含巢狀內容。用計數配對結束標籤，
+ * 因為 Wix 的橫幅裡面還有好幾層 div，用正規表示式會切在錯的地方。
+ */
+function removeElementById(html, id, tag = 'div') {
+  const openRe = new RegExp(`<${tag}\\b[^>]*\\bid=["']${id}["'][^>]*>`, 'i');
+  const match = html.match(openRe);
+  if (!match) return html;
+
+  const start = match.index;
+  const scanner = new RegExp(`<${tag}\\b|</${tag}>`, 'gi');
+  scanner.lastIndex = start + match[0].length;
+
+  let depth = 1;
+  let hit;
+  while ((hit = scanner.exec(html))) {
+    depth += hit[0].startsWith('</') ? -1 : 1;
+    if (depth === 0) return html.slice(0, start) + html.slice(hit.index + hit[0].length);
+  }
+  return html; // 沒配對到就別亂動
+}
+
+/** 移除 Wix 免費版在頁面頂端插入的推廣橫幅 */
+function stripWixAds(html) {
+  return removeElementById(html, 'WIX_ADS');
+}
+
+/**
+ * 免費版的 Wix 站沒有自己的圖示，favicon 直接指向 wix.com —— 留著的話
+ * 瀏覽器分頁上會顯示 Wix 的商標。一併移除，之後可在 content/site.json 指定自己的。
+ */
+function stripWixFavicon(html) {
+  return html.replace(
+    /<link\b[^>]*rel=["'][^"']*icon[^"']*["'][^>]*href=["']https?:\/\/(?:www\.)?wix\.com\/[^"']*["'][^>]*>/gi,
+    ''
+  );
+}
+
+/** 存檔頁面之間互相連結時用的是檔名 */
+function fileLinkReplacements(filename, route) {
+  const forms = new Set([filename, `./${filename}`, encodeURI(filename), `./${encodeURI(filename)}`]);
+  const pairs = [];
+  for (const form of forms) {
+    pairs.push([`href="${form}"`, `href="${route}"`], [`href='${form}'`, `href='${route}'`]);
+  }
+  return pairs;
+}
+
+/**
+ * 刪除沒有被任何頁面或樣式引用的資源。以檔名比對，因為 CSS 內多半用
+ * 同層相對路徑引用（url(x.jpg)），不會出現完整公開路徑。
+ */
+async function pruneUnreferenced(pagePaths) {
+  const cssPaths = (await listFiles(ASSET_ROOT)).filter((rel) => rel.endsWith('.css'));
+
+  let corpus = '';
+  for (const p of pagePaths) corpus += await readFile(p, 'utf8');
+  for (const rel of cssPaths) corpus += await readFile(path.join(ASSET_ROOT, ...rel.split('/')), 'utf8');
+
+  let count = 0;
+  let bytes = 0;
+  for (const rel of await listFiles(ASSET_ROOT)) {
+    const basename = rel.split('/').pop();
+    if (corpus.includes(basename)) continue;
+    const full = path.join(ASSET_ROOT, ...rel.split('/'));
+    bytes += (await readFile(full)).length;
+    await rm(full);
+    count++;
+  }
+  return { count, bytes };
+}
+
+/** 列出頁面中仍指向 Wix 網域的資源，依網址歸類 */
+async function reportRemoteRefs(pagePaths) {
+  const counts = new Map();
+  const pattern = /https?:\/\/(?:static\.wixstatic\.com|static\.parastorage\.com|[\w-]+\.wixapps\.net)\/[^\s"'()<>\\]+/gi;
+
+  for (const p of pagePaths) {
+    const html = await readFile(p, 'utf8');
+    for (const m of html.matchAll(pattern)) {
+      const url = m[0].length > 110 ? `${m[0].slice(0, 110)}…` : m[0];
+      counts.set(url, (counts.get(url) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .map(([url, count]) => ({ url, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 12);
 }
 
 async function main() {
   if (!existsSync(INBOX)) {
-    console.error(`找不到 ${path.relative(ROOT, INBOX)}/。請先建立這個資料夾，把 Chrome 存下的檔案放進去。`);
+    console.error(`找不到 ${path.relative(ROOT, INBOX)}/。`);
     process.exit(1);
   }
 
-  const htmlPaths = await findHtmlFiles(INBOX);
+  const htmlPaths = (await findHtmlFiles(INBOX)).sort();
   if (!htmlPaths.length) {
     console.error(`${path.relative(ROOT, INBOX)}/ 裡（含子資料夾）沒有找到任何 .html 檔案。`);
     process.exit(1);
@@ -162,101 +317,183 @@ async function main() {
   const routesFile = path.join(INBOX, 'routes.json');
   const routeMap = existsSync(routesFile) ? JSON.parse(await readFile(routesFile, 'utf8')) : {};
 
-  // 先決定每個檔案的路由，才能改寫頁面之間的連結
-  const plan = [];
   const warnings = [];
+  const plan = [];
 
-  for (const absPath of htmlPaths.sort()) {
+  for (const absPath of htmlPaths) {
     const filename = path.basename(absPath);
     const relPath = path.relative(INBOX, absPath).split(path.sep).join('/');
     const basename = filename.replace(HTML_EXT, '');
+    const html = await readFile(absPath, 'utf8');
 
     let route = routeMap[relPath] ?? routeMap[filename] ?? routeFromName(basename);
     if (!route) {
       route = `/page-${plan.length + 1}`;
-      warnings.push(`「${relPath}」的檔名無法轉成網址，暫定為 ${route}。請用 routes.json 指定正確路由。`);
+      warnings.push(`「${relPath}」的檔名無法轉成網址，暫定為 ${route}。請用 routes.json 指定。`);
     }
-    plan.push({ absPath, relPath, filename, basename, route });
+
+    plan.push({ absPath, relPath, filename, basename, route, html, originalUrl: extractOriginalUrl(html) });
   }
 
-  // 只有一頁時，它就是首頁
   if (plan.length === 1 && plan[0].route !== '/') {
     warnings.push(`只有一個頁面，視為首頁（原本推斷為 ${plan[0].route}）。`);
     plan[0].route = '/';
   }
 
-  const duplicates = plan
-    .map((p) => p.route)
-    .filter((route, i, all) => all.indexOf(route) !== i);
-  if (duplicates.length) {
-    console.error(`\n有多個頁面對應到同一個網址：${[...new Set(duplicates)].join(', ')}`);
+  const dupes = plan.map((p) => p.route).filter((r, i, all) => all.indexOf(r) !== i);
+  if (dupes.length) {
+    console.error(`\n有多個頁面對應到同一個網址：${[...new Set(dupes)].join(', ')}`);
     console.error('請用 inbox/routes.json 指定各自的路由後再執行一次。\n');
     process.exit(1);
   }
 
-  const pageRoutes = plan.map((p) => [p.filename, p.route]);
-
   await rm(SNAPSHOT, { recursive: true, force: true });
-  await mkdir(SNAPSHOT, { recursive: true });
+  await mkdir(ASSET_ROOT, { recursive: true });
   await writeFile(path.join(SNAPSHOT, '.gitkeep'), '');
+
+  // ── 合併並去重所有頁面的資源 ────────────────────────────────
+  const storedByName = new Map(); // 已使用的存放路徑
+  const pathByHash = new Map(); // 內容雜湊 -> 公開路徑
+  const widgetPaths = new Set(); // 內嵌 Wix 執行期的小工具頁
+  const stats = { copied: 0, deduped: 0, skippedJs: 0, bytes: 0, renamed: 0 };
+
+  for (const item of plan) {
+    item.assetDirName = await findAssetDir(item.absPath);
+    item.overrides = [];
+    if (!item.assetDirName) continue;
+
+    const sourceDir = path.join(path.dirname(item.absPath), item.assetDirName);
+
+    for (const rel of await listFiles(sourceDir)) {
+      if (JS_LIKE.test(rel)) {
+        stats.skippedJs++;
+        continue;
+      }
+
+      const buffer = await readFile(path.join(sourceDir, rel));
+      const hash = crypto.createHash('sha1').update(buffer).digest('hex');
+
+      // 同內容已經存過了，直接指過去
+      if (pathByHash.has(hash)) {
+        stats.deduped++;
+        // 同一份小工具在多個頁面重複出現，去重後仍要保留標記
+        const existing = pathByHash.get(hash);
+        if (existing !== `${ASSET_PREFIX}/${rel}`) {
+          pushOverride(item, rel, existing);
+        }
+        continue;
+      }
+
+      // 同檔名但內容不同（Wix 同一張圖在不同頁面會有不同尺寸），
+      // 補上內容雜湊避免互相覆蓋
+      let storedRel = rel;
+      if (storedByName.has(rel)) {
+        const ext = path.extname(rel);
+        storedRel = `${rel.slice(0, rel.length - ext.length)}.${hash.slice(0, 8)}${ext}`;
+        stats.renamed++;
+        pushOverride(item, rel, `${ASSET_PREFIX}/${storedRel}`);
+      }
+
+      const target = path.join(ASSET_ROOT, ...storedRel.split('/'));
+      await mkdir(path.dirname(target), { recursive: true });
+      await writeFile(target, buffer);
+
+      const publicPath = `${ASSET_PREFIX}/${storedRel}`;
+      storedByName.set(storedRel, hash);
+      pathByHash.set(hash, publicPath);
+      stats.copied++;
+      stats.bytes += buffer.length;
+
+      // 小工具頁（Wix Chat 之類）本身就是一份會載入 Wix 執行期的 HTML，
+      // 記下來，稍後把引用它們的 iframe 一併移除。
+      if (HTML_EXT.test(storedRel) && /parastorage|wixapps|wix\.com/i.test(buffer.toString('utf8'))) {
+        widgetPaths.add(publicPath);
+      }
+    }
+  }
+
+  // ── 改寫並輸出頁面 ──────────────────────────────────────────
+  const linkReplacements = [];
+  for (const item of plan) {
+    linkReplacements.push(...fileLinkReplacements(item.filename, item.route));
+    if (item.originalUrl) linkReplacements.push(...pageUrlReplacements(item.originalUrl, item.route));
+  }
+  const sortedLinks = sortedByLength(linkReplacements);
+
+  // Wix 圖片檔名 -> 本地路徑
+  const mediaMap = new Map();
+  for (const rel of await listFiles(ASSET_ROOT)) {
+    mediaMap.set(rel.split('/').pop(), `${ASSET_PREFIX}/${rel}`);
+  }
 
   console.log('── 匯入 Chrome 存檔 ──────────────────────');
 
-  // 先把每個頁面的資源資料夾都搬好，建立完整對照表，
-  // 才有辦法處理跨頁面互相引用的路徑。
-  const dirMap = new Map();
   for (const item of plan) {
-    item.slug = item.route === '/' ? 'home' : item.route.replace(/^\//, '').replace(/\//g, '-');
-    item.assetDirName = await findAssetDir(item.absPath);
-    item.assetCount = 0;
-
-    if (!item.assetDirName) continue;
-
-    // 所有 <script> 都已移除，.js 檔案不會被載入 —— Wix 的 bundle 動輒數 MB，
-    // 一併排除，避免快照塞進大量永遠用不到的死重量。
-    const target = path.join(SNAPSHOT, 'assets', item.slug);
-    await cp(path.join(path.dirname(item.absPath), item.assetDirName), target, {
-      recursive: true,
-      filter: (src) => !/\.m?js$/i.test(src),
-    });
-    item.assetCount = (await readdir(target, { recursive: true })).length;
-    dirMap.set(item.assetDirName, `/assets/${item.slug}`);
-  }
-
-  for (const item of plan) {
-    if (item.assetDirName) {
-      await rewriteCssIn(path.join(SNAPSHOT, 'assets', item.slug), dirMap);
-    }
-
-    const original = await readFile(item.absPath, 'utf8');
-
-    // HTML 明明引用了資源資料夾，卻找不到對應的資料夾 —— 多半是上傳時
-    // 只傳了 .html 沒傳資料夾，或拖曳時結構被壓平。這會做出滿是破圖的網站，
-    // 寧可講清楚也不要安靜地產出壞結果。
     if (!item.assetDirName) {
       const referenced = new Set();
-      for (const match of original.matchAll(ASSET_DIR_REF)) referenced.add(match[1]);
+      for (const m of item.html.matchAll(ASSET_DIR_REF)) referenced.add(m[1]);
       if (referenced.size) {
         warnings.push(
-          `「${item.relPath}」引用了資源資料夾 ${[...referenced].join('、')}，但同一層找不到。` +
-            ' 圖片會全部破掉 —— 請確認資料夾有一起上傳，且和 .html 在同一層。'
+          `「${item.relPath}」引用了資源資料夾 ${[...referenced].join('、')}，但同一層找不到。圖片會全部破掉。`
         );
       }
     }
 
-    let html = stripScripts(original);
-    html = rewriteAssetPaths(html, dirMap);
-    html = rewritePageLinks(html, pageRoutes);
+    // 個別檔案的覆寫要排在資料夾前綴之前（長度排序會處理），
+    // 前綴替換負責其餘所有沒有更名的資源。
+    const assetReplacements = sortedByLength([
+      ...item.overrides,
+      ...(item.assetDirName
+        ? [
+            [`./${item.assetDirName}/`, `${ASSET_PREFIX}/`],
+            [`${item.assetDirName}/`, `${ASSET_PREFIX}/`],
+            [`./${encodeURI(item.assetDirName)}/`, `${ASSET_PREFIX}/`],
+            [`${encodeURI(item.assetDirName)}/`, `${ASSET_PREFIX}/`],
+          ]
+        : []),
+    ]);
+
+    let html = stripScripts(item.html);
+    html = applyReplacements(html, sortedLinks);
+    html = applyReplacements(html, assetReplacements);
+    html = rewriteWixMediaUrls(html, mediaMap);
+    html = stripRemoteSrcset(html);
+    html = stripWidgetIframes(html, widgetPaths);
+    html = stripDeadMetadata(html);
+    html = stripWixAds(html);
+    html = stripWixFavicon(html);
 
     const outFile = path.join(SNAPSHOT, fileFromRoute(item.route));
     await mkdir(path.dirname(outFile), { recursive: true });
     await writeFile(outFile, html, 'utf8');
 
-    console.log(
-      `  ✓ ${item.relPath}  →  ${item.route}  (${item.assetCount} 個資源${
-        item.assetDirName ? '' : '，無資源資料夾 ⚠'
-      })`
-    );
+    console.log(`  ✓ ${item.route.padEnd(26)} ← ${item.filename}`);
+  }
+
+  // 資源全部平移到同一層，CSS 的同層相對路徑（url(x.jpg)）仍然成立，不需改寫。
+
+  // ── 清掉沒有被引用的資源 ────────────────────────────────────
+  // 移除小工具 iframe 後，它的 HTML 與樣式（Wix Chat 的 CSS 就有 1.3 MB）
+  // 都成了孤兒；同理，被拿掉的 srcset 也可能讓某些圖片失去引用。
+  const pruned = await pruneUnreferenced(plan.map((i) => path.join(SNAPSHOT, fileFromRoute(i.route))));
+
+  console.log('\n── 資源 ──');
+  console.log(`  保留 ${stats.copied} 個（${(stats.bytes / 1024 / 1024).toFixed(1)} MB）`);
+  console.log(`  去重省下 ${stats.deduped} 個重複檔案`);
+  console.log(`  排除 ${stats.skippedJs} 個 JS`);
+  if (stats.renamed) console.log(`  ${stats.renamed} 個同名不同內容，已加上雜湊區分`);
+  if (pruned.count) {
+    console.log(`  清掉 ${pruned.count} 個未被引用的檔案（${(pruned.bytes / 1024 / 1024).toFixed(1)} MB）`);
+  }
+
+  // ── 還連著 Wix 的地方 ───────────────────────────────────────
+  const remaining = await reportRemoteRefs(plan.map((i) => path.join(SNAPSHOT, fileFromRoute(i.route))));
+  if (remaining.length) {
+    console.log('\n── 仍指向 Wix 的資源 ──');
+    for (const { url, count } of remaining) console.log(`  ${count} 處  ${url}`);
+    console.log('  Wix 停用後這些會失效，需要另外取得檔案或改用替代方案。');
+  } else {
+    console.log('\n✓ 頁面中已無任何指向 Wix 的資源。');
   }
 
   if (warnings.length) {
@@ -264,7 +501,7 @@ async function main() {
     for (const w of warnings) console.log(`  - ${w}`);
   }
 
-  console.log('\n接著執行 `npm run build`，再用 `npm run audit` 檢查殘留的 Wix 依賴。');
+  console.log('\n接著執行 `npm run build`，再用 `npm run audit` 驗收。');
 }
 
 main().catch((err) => {
