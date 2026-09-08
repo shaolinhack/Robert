@@ -40,7 +40,34 @@
         "🔷 Facebook：蘿蔔先生｜李日韋 (Robert)",
         "🔷 Instagram：讀癮　總編輯"
       ],
-      "note": "歡迎合作邀約，請留言或信件聯繫"
+      "note": "歡迎合作邀約，請留言或信件聯繫",
+      "social": [
+        {
+          "label": "Facebook",
+          "href": "https://www.facebook.com/robert.19870329",
+          "icon": "facebook"
+        },
+        {
+          "label": "Instagram",
+          "href": "https://www.instagram.com/robert.readbook/",
+          "icon": "instagram"
+        },
+        {
+          "label": "YouTube",
+          "href": "https://www.youtube.com/channel/UC8XISv3nfPsgkUel2lM9j5w",
+          "icon": "youtube"
+        },
+        {
+          "label": "Medium",
+          "href": "https://medium.com/@shaolinhack",
+          "icon": "medium"
+        },
+        {
+          "label": "Podcast 讀癮",
+          "href": "https://podcasts.apple.com/us/podcast/%E8%AE%80%E7%99%AE/id1662758348",
+          "icon": "podcast-apple"
+        }
+      ]
     },
     {
       "type": "icon-grid",

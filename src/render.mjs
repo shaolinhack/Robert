@@ -3,7 +3,7 @@
  * 零相依，所以 Docker 建置階段不需要 npm install。
  */
 
-import { icon } from './icons.mjs';
+import { icon, brandIcon } from './icons.mjs';
 
 /* ── 工具 ─────────────────────────────────────────────────── */
 
@@ -66,6 +66,23 @@ const heading = (text, level = 2) =>
   text ? `<h${level}>${inline(text)}</h${level}>` : '';
 
 const eyebrow = (text) => (text ? `<p class="eyebrow">${escapeHtml(text)}</p>` : '');
+
+/**
+ * 社群連結列。圖示只是視覺，真正的名稱放在 aria-label 與 title，
+ * 螢幕閱讀器與滑鼠停留都拿得到。
+ */
+function renderSocialRow(items, className = 'social-row') {
+  const links = toArray(items)
+    .filter((item) => item.href && item.icon)
+    .map(
+      (item) =>
+        `<li><a href="${escapeHtml(item.href)}" target="_blank" rel="noopener noreferrer" ` +
+        `aria-label="${escapeHtml(item.label)}" title="${escapeHtml(item.label)}">` +
+        `${brandIcon(item.icon, { size: 20 })}</a></li>`
+    )
+    .join('\n        ');
+  return links ? `<ul class="${className}">\n        ${links}\n      </ul>` : '';
+}
 
 /* ── 區塊 ─────────────────────────────────────────────────── */
 
@@ -130,6 +147,7 @@ const blocks = {
     <div class="profile">
       <div class="profile__bio reveal">
         ${paragraphs(b.body)}
+        ${renderSocialRow(b.social)}
       </div>
       <div class="profile__side reveal">
         ${highlights ? `<ul class="profile__highlights">\n        ${highlights}\n      </ul>` : ''}
@@ -477,19 +495,12 @@ function renderNav(site, currentRoute) {
 }
 
 function renderFooter(site) {
-  const social = toArray(site.social)
-    .map(
-      (s) =>
-        `<li><a href="${escapeHtml(s.href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(
-          s.label
-        )}</a></li>`
-    )
-    .join('\n          ');
+  const social = renderSocialRow(site.social, 'social-row');
 
   return `<footer class="site-footer">
     <div class="container site-footer__inner">
       <p>${inline(site.footer?.text ?? `© ${new Date().getFullYear()} ${site.title}`)}</p>
-      ${social ? `<ul class="social">\n          ${social}\n        </ul>` : ''}
+      ${social}
     </div>
   </footer>`;
 }

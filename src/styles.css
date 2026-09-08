@@ -8,16 +8,18 @@
 
   /* 色彩 —— 淺色模式 */
   --bg:            #ffffff;
-  --bg-subtle:     #f6f7f9;
-  --bg-inset:      #eef0f4;
-  --text:          #14171c;
-  --text-muted:    #5b6472;
-  --border:        #e2e5ea;
-  --accent:        #1f6feb;
-  --accent-hover:  #1a5fd0;
+  --bg-subtle:     #f8f6f6;
+  --bg-inset:      #f0ecec;
+  --text:          #1a1618;
+  --text-muted:    #6b6266;
+  --border:        #e7e1e2;
+  /* 品牌紅取自原站（#ed1c24）。文字用略深的 #d31119 —— 原色在白底上只有
+     4.38:1，低於無障礙標準；深一階後 5.43:1，肉眼幾乎看不出差別。 */
+  --accent:        #d31119;
+  --accent-hover:  #a8121a;
   --accent-text:   #ffffff;
-  --accent-wash:   #eef4ff;
-  --accent-line:   #d3e2fb;
+  --accent-wash:   #fdf1f1;
+  --accent-line:   #f5d8d9;
 
   /* 字體 */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto,
@@ -39,17 +41,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg:            #0f1115;
-    --bg-subtle:     #151922;
-    --bg-inset:      #1b2029;
-    --text:          #e7eaf0;
-    --text-muted:    #9aa3b2;
-    --border:        #262c37;
-    --accent:        #5b9cff;
-    --accent-hover:  #7db0ff;
-    --accent-text:   #0f1115;
-    --accent-wash:   #151d2c;
-    --accent-line:   #26344d;
+    --bg:            #121014;
+    --bg-subtle:     #1a1719;
+    --bg-inset:      #221e21;
+    --text:          #f0eaec;
+    --text-muted:    #a9a0a4;
+    --border:        #302a2d;
+    /* 深底上要提亮才讀得到：#ff6b6b 對 #121014 是 6.8:1 */
+    --accent:        #ff6b6b;
+    --accent-hover:  #ff8f8f;
+    --accent-text:   #121014;
+    --accent-wash:   #241618;
+    --accent-line:   #3d2429;
     --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
   }
 }
@@ -497,3 +500,25 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
   margin: 0; font-size: .8125rem; color: var(--text-muted);
   font-variant-numeric: tabular-nums; letter-spacing: .02em;
 }
+
+/* ── 社群連結列 ─────────────────────────────────────────────
+   圖示以主色圓框呈現，滑過翻轉成實心；名稱交給 aria-label。
+   ───────────────────────────────────────────────────────── */
+
+.social-row {
+  display: flex; flex-wrap: wrap; gap: var(--space-3);
+  list-style: none; margin: var(--space-5) 0 0; padding: 0;
+}
+.social-row a {
+  display: grid; place-items: center; width: 40px; height: 40px;
+  border-radius: 50%; color: var(--accent);
+  border: 1px solid var(--border); background: var(--bg);
+  transition: background-color .15s, color .15s, border-color .15s, transform .15s;
+}
+.social-row a:hover {
+  background: var(--accent); color: var(--accent-text);
+  border-color: var(--accent); transform: translateY(-2px);
+}
+.social-row a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.site-footer .social-row { margin: 0; }
+@media (prefers-reduced-motion: reduce) { .social-row a:hover { transform: none; } }

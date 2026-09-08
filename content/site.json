@@ -22,23 +22,28 @@
   "social": [
     {
       "label": "Facebook",
-      "href": "https://www.facebook.com/robert.19870329"
+      "href": "https://www.facebook.com/robert.19870329",
+      "icon": "facebook"
     },
     {
       "label": "Instagram",
-      "href": "https://www.instagram.com/robert.readbook/"
+      "href": "https://www.instagram.com/robert.readbook/",
+      "icon": "instagram"
     },
     {
       "label": "YouTube",
-      "href": "https://www.youtube.com/channel/UC8XISv3nfPsgkUel2lM9j5w"
+      "href": "https://www.youtube.com/channel/UC8XISv3nfPsgkUel2lM9j5w",
+      "icon": "youtube"
     },
     {
       "label": "Medium",
-      "href": "https://medium.com/@shaolinhack"
+      "href": "https://medium.com/@shaolinhack",
+      "icon": "medium"
     },
     {
       "label": "Podcast 讀癮",
-      "href": "https://podcasts.apple.com/us/podcast/%E8%AE%80%E7%99%AE/id1662758348"
+      "href": "https://podcasts.apple.com/us/podcast/%E8%AE%80%E7%99%AE/id1662758348",
+      "icon": "podcast-apple"
     }
   ],
   "footer": {
