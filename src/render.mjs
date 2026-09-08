@@ -165,7 +165,7 @@ const blocks = {
   logos(b) {
     const items = toArray(b.items)
       .map(
-        (item) => `<li class="logos__item reveal">
+        (item) => `<li class="logos__item${item.label ? ' logos__item--named' : ''} reveal">
         ${image(item)}
         ${item.label ? `<span class="logos__label">${inline(item.label)}</span>` : ''}
       </li>`

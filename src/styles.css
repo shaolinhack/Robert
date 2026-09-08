@@ -435,6 +435,13 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 }
 .logos__label { color: var(--text-muted); font-size: .9375rem; }
 
+/* 有公司名稱的那一格：原站是標誌在左、粗體公司名在右，並排一列。 */
+.logos__item--named { flex-direction: row; justify-content: center; text-align: left; gap: var(--space-4); }
+.logos__item--named img { width: auto; flex: 0 0 auto; max-width: 92px; height: 84px; }
+.logos__item--named .logos__label {
+  color: var(--text); font-weight: 700; font-size: 1rem; line-height: 1.55;
+}
+
 /* ── 經歷 ───────────────────────────────────────────────── */
 
 .experience {
