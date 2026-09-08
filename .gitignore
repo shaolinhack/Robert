@@ -3,3 +3,4 @@ node_modules/
 *.log
 .capture-cache/
 capture-report.json
+public/

@@ -35,7 +35,7 @@ async function walk(dir, out = []) {
 
 async function main() {
   if (!existsSync(ROOT)) {
-    console.error(`找不到 ${ROOT}。請先執行 \`npm run capture\`。`);
+    console.error(`找不到 ${ROOT}。請先執行 \`npm run build\`。`);
     process.exit(1);
   }
 

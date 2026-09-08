@@ -1,0 +1,64 @@
+{
+  "_comment": "區塊語法範例。檔名以底線開頭的檔案不會被建置，這份純粹當作可用區塊的參考。實際頁面請新增 index.json、about.json 等。",
+  "title": "區塊範例",
+  "description": "所有可用區塊的寫法示範",
+  "blocks": [
+    {
+      "type": "hero",
+      "eyebrow": "小標",
+      "title": "主標題",
+      "subtitle": "副標，可用 **粗體**、*斜體*、[連結](https://example.com)、`程式碼`。",
+      "image": { "src": "/assets/hero.jpg", "alt": "主視覺說明文字" },
+      "actions": [
+        { "label": "主要按鈕", "href": "/contact" },
+        { "label": "次要按鈕", "href": "/about", "variant": "secondary" }
+      ]
+    },
+    {
+      "type": "prose",
+      "title": "純文字段落",
+      "body": ["第一段。", "第二段。"],
+      "align": "center",
+      "background": "subtle"
+    },
+    {
+      "type": "split",
+      "title": "圖文並排",
+      "body": ["文字在一側，圖片在另一側。"],
+      "image": { "src": "/assets/photo.jpg", "alt": "說明文字" },
+      "mediaPosition": "right"
+    },
+    {
+      "type": "cards",
+      "title": "卡片列表",
+      "body": ["適合服務項目、作品集、文章列表。"],
+      "items": [
+        { "title": "項目一", "body": "簡短描述。", "href": "/service-1", "image": { "src": "/assets/card-1.jpg", "alt": "" } },
+        { "title": "項目二", "body": "簡短描述。" }
+      ]
+    },
+    {
+      "type": "gallery",
+      "title": "圖庫",
+      "images": [
+        { "src": "/assets/g1.jpg", "alt": "作品一", "caption": "圖說（可省略）" },
+        { "src": "/assets/g2.jpg", "alt": "作品二" }
+      ]
+    },
+    {
+      "type": "contact",
+      "title": "聯絡方式",
+      "items": [
+        { "label": "Email", "value": "hello@example.com", "href": "mailto:hello@example.com" },
+        { "label": "電話", "value": "02-1234-5678", "href": "tel:+886212345678" },
+        { "label": "地址", "value": "台北市…" }
+      ]
+    },
+    {
+      "type": "cta",
+      "title": "行動呼籲",
+      "body": ["最後推一把。"],
+      "actions": [{ "label": "立即聯絡", "href": "/contact" }]
+    }
+  ]
+}

@@ -1,6 +1,10 @@
 .git
 node_modules
-scripts
-*.md
+public
 capture-report.json
+*.log
 .DS_Store
+README.md
+scripts/capture.mjs
+scripts/audit.mjs
+scripts/serve.mjs

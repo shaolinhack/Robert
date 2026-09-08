@@ -65,7 +65,7 @@ const server = http.createServer(async (req, res) => {
 
   if (!file) {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-    res.end('404 Not Found — public/ 是空的嗎？先執行 npm run capture');
+    res.end('404 Not Found — public/ 是空的嗎？先執行 npm run build');
     return;
   }
 

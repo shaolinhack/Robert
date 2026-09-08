@@ -8,7 +8,7 @@
  *
  * 可用環境變數：
  *   START_URL   起始網址（預設 https://shaolinhack.wixsite.com/robert）
- *   OUT_DIR     輸出目錄（預設 public）
+ *   OUT_DIR     輸出目錄（預設 snapshot）
  *   MAX_PAGES   最多抓幾頁（預設 100）
  *   KEEP_SCRIPTS=1  保留原始 JS（除錯用，正式輸出不建議）
  *
@@ -24,7 +24,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 const START_URL = process.env.START_URL || 'https://shaolinhack.wixsite.com/robert';
-const OUT_DIR = path.resolve(process.env.OUT_DIR || 'public');
+const OUT_DIR = path.resolve(process.env.OUT_DIR || 'snapshot');
 const MAX_PAGES = Number(process.env.MAX_PAGES || 100);
 const KEEP_SCRIPTS = process.env.KEEP_SCRIPTS === '1';
 
@@ -218,7 +218,7 @@ async function main() {
   await writeFile('capture-report.json', JSON.stringify(report, null, 2), 'utf8');
 
   console.log(`\n完成：${pages.length} 頁、${assetMap.size} 個資源 → ${OUT_DIR}`);
-  console.log('接著執行 `npm run audit` 檢查是否還有殘留的 Wix 外部依賴。');
+  console.log('接著執行 `npm run build` 產生 public/，再用 `npm run audit` 驗收。');
 }
 
 /** 把 HTML 內所有已下載的資源網址改成本地路徑，並移除 Wix 的執行期腳本 */
