@@ -1,0 +1,31 @@
+{
+  "_comment": "字型替換設定。原站的 Avenir / DIN Next / Futura / Helvetica 是 Wix 為平台上的網站購買的商業授權字型，自行託管很可能不在授權範圍內，因此改用 Google Fonts 上的免費替代品。中文一律走系統字型（微軟正黑體／蘋方），零下載也不牽涉授權。",
+
+  "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;500;700&family=Jost:wght@300;400;500&family=Barlow:wght@300;400;500&display=swap",
+
+  "chineseStack": "\"Microsoft JhengHei\", \"微軟正黑體\", \"PingFang TC\", \"Heiti TC\", \"Noto Sans TC\", sans-serif",
+
+  "substitutions": {
+    "avenir-lt-w01_85-heavy1475544": { "family": "Montserrat", "weight": 700 },
+    "avenir-lt-w01_35-light1475496": { "family": "Montserrat", "weight": 300 },
+    "avenir-lt-w05_85-heavy": { "family": "Montserrat", "weight": 700 },
+    "avenir-lt-w05_35-light": { "family": "Montserrat", "weight": 300 },
+    "din-next-w01-light": { "family": "Barlow", "weight": 300 },
+    "din-next-w10-light": { "family": "Barlow", "weight": 300 },
+    "playfairdisplay-bold": { "family": "Playfair Display", "weight": 700 },
+    "playfair display": { "family": "Playfair Display", "weight": 400 },
+    "futura-lt-w01-light": { "family": "Jost", "weight": 300 },
+    "futura-lt-w01-book": { "family": "Jost", "weight": 400 },
+    "futura-lt-w05-book": { "family": "Jost", "weight": 400 },
+    "helvetica-w01-light": { "family": "Helvetica Neue", "weight": 300 },
+    "helvetica-w01-roman": { "family": "Helvetica Neue", "weight": 400 },
+    "helvetica-w02-light": { "family": "Helvetica Neue", "weight": 300 },
+    "wixmadefortext": { "family": "Montserrat", "weight": 400 },
+    "wixmadefordisplay": { "family": "Montserrat", "weight": 600 },
+    "wixfreemiumfontw01-35thin": { "family": "Montserrat", "weight": 300 },
+    "wixfreemiumfontw01-45ligh": { "family": "Montserrat", "weight": 300 },
+    "wixfreemiumfontw01-55roma": { "family": "Montserrat", "weight": 400 },
+    "wixfreemiumfontw01-65medi": { "family": "Montserrat", "weight": 500 },
+    "wixfreemiumfontw01-75bold": { "family": "Montserrat", "weight": 700 }
+  }
+}

@@ -10,3 +10,4 @@ inbox/*
 !inbox/README.md
 !inbox/routes.json
 !inbox/*.zip
+!inbox/*.html

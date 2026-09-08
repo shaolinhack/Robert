@@ -163,10 +163,34 @@ function pushOverride(item, rel, publicPath) {
  * 本地檔是某個特定尺寸的算圖，拿來對應所有尺寸沒有問題，瀏覽器會自行縮放。
  */
 function rewriteWixMediaUrls(html, mediaMap) {
-  return html.replace(
-    /https?:\/\/static\.wixstatic\.com\/media\/([^/"'\s)]+)(?:\/[^"'\s)]*)?/gi,
-    (whole, mediaName) => mediaMap.get(mediaName) ?? whole
-  );
+  // 只用空白、引號與角括號斷句：
+  //   - 不能用右括號，圖片的顯示名稱會出現在網址結尾且可能含括號
+  //     （例如「R 蘿蔔先生 (黑底白字)透明.png」）
+  //   - 不能用逗號，裁切參數本身就帶逗號（.../v1/crop/x_474,y_51,w_1821/...）
+  // srcset 以「逗號加空白」分隔，所以逗號只會黏在結尾，單獨處理即可。
+  // 這些網址只出現在 srcset 清單與引號屬性裡，不會出現在 CSS 的 url() 內。
+  return html.replace(/https?:\/\/static\.wixstatic\.com\/media\/[^"'\s<>]+/gi, (match) => {
+    const trailing = match.match(/[,;]+$/)?.[0] ?? '';
+    const url = trailing ? match.slice(0, -trailing.length) : match;
+    const [mediaId, ...rest] = url.slice(url.indexOf('/media/') + '/media/'.length).split('/');
+
+    // 網址開頭是媒體 ID，結尾則是顯示名稱。Chrome 存檔時用的可能是任一種
+    // （logo 就是存成顯示名稱），兩個都試。
+    const candidates = [mediaId, rest.at(-1), safeDecode(rest.at(-1) ?? '')];
+    for (const candidate of candidates) {
+      const hit = candidate && mediaMap.get(candidate);
+      if (hit) return hit + trailing;
+    }
+    return match;
+  });
+}
+
+function safeDecode(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }
 
 /**
@@ -188,12 +212,25 @@ function stripRemoteSrcset(html) {
   });
 }
 
-/** 移除指向 Wix 小工具的 iframe（例如 Wix Chat），這些功能遷移後不可能運作 */
-function stripWidgetIframes(html, widgetPaths) {
-  if (!widgetPaths.size) return html;
+/**
+ * 移除 Wix 小工具的 iframe（例如 Wix Chat）—— 這些功能遷移後不可能運作。
+ * 同時移除指向不存在檔案的 iframe：頁面沒附資源資料夾時，小工具的 HTML
+ * 也不會在資源庫裡，留著只會是一個 404 的空框。
+ */
+function stripWidgetIframes(html, widgetPaths, availableAssets) {
   return html.replace(/<iframe\b[^>]*>(?:[\s\S]*?<\/iframe>)?/gi, (tag) => {
     const src = tag.match(/src=["']([^"']+)["']/i)?.[1];
-    return src && widgetPaths.has(src.replace(/^\.\//, '')) ? '' : tag;
+    if (!src) return tag;
+
+    const normalized = src.replace(/^\.\//, '');
+    if (widgetPaths.has(normalized)) return '';
+
+    // 指向本站但檔案不存在
+    if (normalized.startsWith(`${ASSET_PREFIX}/`)) {
+      const rel = safeDecode(normalized.slice(ASSET_PREFIX.length + 1));
+      if (!availableAssets.has(rel)) return '';
+    }
+    return tag;
   });
 }
 
@@ -248,6 +285,59 @@ function stripWixFavicon(html) {
     /<link\b[^>]*rel=["'][^"']*icon[^"']*["'][^>]*href=["']https?:\/\/(?:www\.)?wix\.com\/[^"']*["'][^>]*>/gi,
     ''
   );
+}
+
+/**
+ * 字型替換。原站的 Avenir / DIN Next / Futura / Helvetica 是 Wix 為平台上的
+ * 網站購買的商業授權字型，自行託管很可能不在授權範圍內，所以不下載、改替換。
+ *
+ * 做三件事：
+ *   1. 移除所有從 Wix 載入字型的 @font-face —— 這是最後一個連向 Wix 的東西
+ *   2. 把 --font_N 變數的粗細改成替代字型對應的字重（原本一律是 normal，
+ *      粗細是靠「heavy」「light」這種字體名稱表達的，只換名稱會弄丟）
+ *   3. 把 CSS 裡的字型名稱換成替代字型加上中文系統字型的堆疊
+ */
+function replaceFonts(html, config) {
+  if (!config) return html;
+
+  const { substitutions = {}, chineseStack = 'sans-serif', googleFontsUrl } = config;
+  const names = Object.keys(substitutions).sort((a, b) => b.length - a.length);
+
+  // 1. 移除指向 Wix 的 @font-face
+  let out = html.replace(/@font-face\s*\{[^}]*\}/gi, (block) =>
+    /parastorage\.com|wixstatic\.com/i.test(block) ? '' : block
+  );
+
+  // 2. --font_N 的字重。字體名稱決定粗細，所以要先看原本用的是哪一個。
+  out = out.replace(/(--font_\d+:\s*)([^;}]+)/gi, (whole, prefix, value) => {
+    const matched = names.find((name) => value.toLowerCase().includes(name));
+    if (!matched) return whole;
+    const { weight } = substitutions[matched];
+    // 簡寫格式：font-style font-variant font-weight size/line-height family
+    return prefix + value.replace(/^(\s*\S+\s+\S+\s+)\S+/, `$1${weight}`);
+  });
+
+  // 3. 名稱替換。長的先換，避免 futura-lt-w01-book 被 futura-lt-w01 之類的前綴咬掉。
+  for (const name of names) {
+    const stack = `"${substitutions[name].family}", ${chineseStack}`;
+    out = out.replace(new RegExp(`(["'])${escapeRegExp(name)}\\1`, 'gi'), stack);
+    out = out.replace(new RegExp(escapeRegExp(name), 'gi'), stack);
+  }
+
+  // 4. 載入替代字型
+  if (googleFontsUrl) {
+    const link =
+      `<link rel="preconnect" href="https://fonts.googleapis.com">` +
+      `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>` +
+      `<link rel="stylesheet" href="${googleFontsUrl}">`;
+    out = out.replace(/<\/head>/i, `${link}</head>`);
+  }
+
+  return out;
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /** 存檔頁面之間互相連結時用的是檔名 */
@@ -313,6 +403,9 @@ async function main() {
     console.error(`${path.relative(ROOT, INBOX)}/ 裡（含子資料夾）沒有找到任何 .html 檔案。`);
     process.exit(1);
   }
+
+  const fontsFile = path.join(ROOT, 'content', 'fonts.json');
+  const fontConfig = existsSync(fontsFile) ? JSON.parse(await readFile(fontsFile, 'utf8')) : null;
 
   const routesFile = path.join(INBOX, 'routes.json');
   const routeMap = existsSync(routesFile) ? JSON.parse(await readFile(routesFile, 'utf8')) : {};
@@ -422,35 +515,29 @@ async function main() {
 
   // Wix 圖片檔名 -> 本地路徑
   const mediaMap = new Map();
-  for (const rel of await listFiles(ASSET_ROOT)) {
+  const availableAssets = new Set(await listFiles(ASSET_ROOT));
+  for (const rel of availableAssets) {
     mediaMap.set(rel.split('/').pop(), `${ASSET_PREFIX}/${rel}`);
   }
 
   console.log('── 匯入 Chrome 存檔 ──────────────────────');
 
   for (const item of plan) {
-    if (!item.assetDirName) {
-      const referenced = new Set();
-      for (const m of item.html.matchAll(ASSET_DIR_REF)) referenced.add(m[1]);
-      if (referenced.size) {
-        warnings.push(
-          `「${item.relPath}」引用了資源資料夾 ${[...referenced].join('、')}，但同一層找不到。圖片會全部破掉。`
-        );
-      }
-    }
-
     // 個別檔案的覆寫要排在資料夾前綴之前（長度排序會處理），
     // 前綴替換負責其餘所有沒有更名的資源。
+    // 沒有一起上傳資源資料夾的頁面，同樣套用前綴改寫：資源庫是全站共用的，
+    // 只要同一個檔案曾出現在別的頁面就已經在庫裡了，不必重傳。
+    const referencedDirs = new Set(item.assetDirName ? [item.assetDirName] : []);
+    for (const m of item.html.matchAll(ASSET_DIR_REF)) referencedDirs.add(m[1]);
+
     const assetReplacements = sortedByLength([
       ...item.overrides,
-      ...(item.assetDirName
-        ? [
-            [`./${item.assetDirName}/`, `${ASSET_PREFIX}/`],
-            [`${item.assetDirName}/`, `${ASSET_PREFIX}/`],
-            [`./${encodeURI(item.assetDirName)}/`, `${ASSET_PREFIX}/`],
-            [`${encodeURI(item.assetDirName)}/`, `${ASSET_PREFIX}/`],
-          ]
-        : []),
+      ...[...referencedDirs].flatMap((dir) => [
+        [`./${dir}/`, `${ASSET_PREFIX}/`],
+        [`${dir}/`, `${ASSET_PREFIX}/`],
+        [`./${encodeURI(dir)}/`, `${ASSET_PREFIX}/`],
+        [`${encodeURI(dir)}/`, `${ASSET_PREFIX}/`],
+      ]),
     ]);
 
     let html = stripScripts(item.html);
@@ -458,16 +545,29 @@ async function main() {
     html = applyReplacements(html, assetReplacements);
     html = rewriteWixMediaUrls(html, mediaMap);
     html = stripRemoteSrcset(html);
-    html = stripWidgetIframes(html, widgetPaths);
+    html = stripWidgetIframes(html, widgetPaths, availableAssets);
     html = stripDeadMetadata(html);
     html = stripWixAds(html);
     html = stripWixFavicon(html);
+    html = replaceFonts(html, fontConfig);
 
     const outFile = path.join(SNAPSHOT, fileFromRoute(item.route));
     await mkdir(path.dirname(outFile), { recursive: true });
     await writeFile(outFile, html, 'utf8');
 
-    console.log(`  ✓ ${item.route.padEnd(26)} ← ${item.filename}`);
+    // 只有在改寫之後還留著 Wix 圖片網址時才示警。少了資源資料夾不必然是問題 ——
+    // 資源是全站共用的，同一張圖只要出現在其他頁面就已經在庫裡了。
+    const orphaned = html.match(/https?:\/\/static\.wixstatic\.com\/media\//gi)?.length ?? 0;
+    if (orphaned && !item.assetDirName) {
+      warnings.push(
+        `「${item.relPath}」少了資源資料夾，且有 ${orphaned} 張圖在共用資源庫裡也找不到，` +
+          '會是破圖。請把該頁的 _files 資料夾一併上傳。'
+      );
+    }
+
+    console.log(
+      `  ✓ ${item.route.padEnd(26)} ← ${item.filename}${item.assetDirName ? '' : '（無資源資料夾，圖片取自共用庫）'}`
+    );
   }
 
   // 資源全部平移到同一層，CSS 的同層相對路徑（url(x.jpg)）仍然成立，不需改寫。
