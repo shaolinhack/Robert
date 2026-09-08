@@ -156,6 +156,8 @@ async function collectRoutes() {
     if (!entry.endsWith('.html')) continue;
     const rel = entry.split(path.sep).join('/');
     if (rel === '404.html') continue;
+    // assets/ 底下的 HTML 是小工具的殘留，不是頁面 —— 放進 sitemap 會被搜尋引擎收錄
+    if (rel.startsWith('assets/')) continue;
 
     if (rel === 'index.html') routes.add('/');
     else if (rel.endsWith('/index.html')) routes.add(`/${rel.slice(0, -'/index.html'.length)}`);
