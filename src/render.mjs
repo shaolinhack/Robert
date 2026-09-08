@@ -772,7 +772,7 @@ export function renderPage({ site, page }) {
     canonical && `<meta property="og:url" content="${escapeHtml(canonical)}">`,
     page.image && `<meta property="og:image" content="${escapeHtml(page.image)}">`,
     '<meta name="twitter:card" content="summary_large_image">',
-    '<link rel="stylesheet" href="/assets/styles.css">',
+    `<link rel="stylesheet" href="${escapeHtml(site.stylesheet ?? '/assets/styles.css')}">`,
     site.favicon && `<link rel="icon" href="${escapeHtml(site.favicon)}">`,
     renderJsonLd({ site, page }),
   ].filter(Boolean).join('\n  ');

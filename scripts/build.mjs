@@ -16,6 +16,7 @@
 import { mkdir, readdir, readFile, writeFile, rm, cp, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { renderPage, escapeHtml } from '../src/render.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -223,6 +224,13 @@ async function main() {
   await mkdir(OUT_DIR, { recursive: true });
 
   const site = { ...DEFAULT_SITE, ...((await readJson(path.join(CONTENT_DIR, 'site.json'))) ?? {}) };
+
+  // 樣式表檔名帶內容雜湊。/assets/* 是以 immutable 快取一年的，若檔名固定，
+  // 瀏覽器整年都不會回來問，改了樣式使用者也看不到（要手動清快取）。
+  // 內容一變檔名就變，等於換一個新網址，瀏覽器自然會抓新的。
+  const cssSource = await readFile(path.join(SRC_DIR, 'styles.css'));
+  const cssHash = createHash('sha256').update(cssSource).digest('hex').slice(0, 8);
+  site.stylesheet = `/assets/styles.${cssHash}.css`;
   const milestones = (await readJson(path.join(CONTENT_DIR, 'milestones.json'))) ?? {};
   const posts = (await readJson(path.join(CONTENT_DIR, 'posts-index.json'))) ?? [];
 
@@ -242,7 +250,7 @@ async function main() {
 
   // 3. 設計系統與自備素材
   await mkdir(path.join(OUT_DIR, 'assets'), { recursive: true });
-  await cp(path.join(SRC_DIR, 'styles.css'), path.join(OUT_DIR, 'assets', 'styles.css'));
+  await writeFile(path.join(OUT_DIR, 'assets', `styles.${cssHash}.css`), cssSource);
 
   const contentAssets = path.join(CONTENT_DIR, 'assets');
   if (await isNonEmptyDir(contentAssets)) {

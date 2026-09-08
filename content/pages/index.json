@@ -167,27 +167,27 @@
       "title": "SKILL",
       "items": [
         {
-          "label": "AI 開發",
+          "label": "AI Coding",
           "icon": "sparkles"
         },
         {
-          "label": "AI 自動化",
+          "label": "AI Automation",
           "icon": "workflow"
         },
         {
-          "label": "資訊系統",
+          "label": "MIS",
           "icon": "server"
         },
         {
-          "label": "專案管理",
+          "label": "Project",
           "icon": "kanban"
         },
         {
-          "label": "時間管理",
+          "label": "Time Mgmt",
           "icon": "clock"
         },
         {
-          "label": "品牌經營",
+          "label": "Branding",
           "icon": "badge-check"
         },
         {
