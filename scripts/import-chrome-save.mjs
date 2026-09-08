@@ -271,6 +271,84 @@ function removeElementById(html, id, tag = 'div') {
   return html; // 沒配對到就別亂動
 }
 
+/**
+ * 清掉會把訪客或搜尋引擎導回 Wix 的殘留。這些不像圖片那樣看得見，
+ * 但影響更實際：
+ *   - JSON-LD 的 SearchAction 會告訴搜尋引擎「這個站的搜尋在 Wix 上」
+ *   - rel="alternate" 的 RSS 指向 Wix，對方一停就是死的 feed
+ *   - 搜尋框的 form action 會讓訪客一按就跳去 Wix
+ *   - Chrome 存檔留下的 <!-- saved from url --> 註解
+ */
+function stripWixEndpoints(html) {
+  const cleaned = html
+    .replace(/<!--\s*saved from url=[^>]*-->/gi, '')
+    .replace(/<link\b[^>]*rel=["']alternate["'][^>]*(?:wixsite\.com|wixapps\.net)[^>]*>/gi, '')
+    // 搜尋框沒有後端可接，拿掉 action 讓它停在原地，而不是把人送去 Wix
+    .replace(
+      /(<form\b[^>]*)\saction=["'][^"']*(?:wixsite\.com|wixapps\.net|wix\.com)[^"']*["']/gi,
+      '$1'
+    );
+
+  return removeJsonKey(cleaned, 'potentialAction', /wixsite\.com|wixapps\.net/i);
+}
+
+/**
+ * 從 JSON-LD 移除某個鍵及其整個物件值，只在該物件符合 predicate 時才動手。
+ *
+ * 這裡不能用正規表示式：Wix 的搜尋網址含有 {search_term} 這種佔位字串，
+ * 括號會被算進巢狀層數而配對錯誤。改成逐字掃描並略過字串內容。
+ */
+function removeJsonKey(text, key, predicate) {
+  const marker = `"${key}":`;
+  let out = '';
+  let cursor = 0;
+
+  for (;;) {
+    const at = text.indexOf(marker, cursor);
+    if (at < 0) break;
+
+    const braceAt = text.indexOf('{', at + marker.length);
+    const braceEnd = braceAt < 0 ? -1 : matchingBrace(text, braceAt);
+    if (braceEnd < 0) break;
+
+    if (!predicate.test(text.slice(braceAt, braceEnd))) {
+      out += text.slice(cursor, braceEnd);
+      cursor = braceEnd;
+      continue;
+    }
+
+    // 連同前面的逗號一起刪掉，否則會留下 {"a":1,,"b":2} 這種壞掉的 JSON
+    let from = at;
+    while (from > 0 && /\s/.test(text[from - 1])) from--;
+    if (text[from - 1] === ',') from--;
+
+    out += text.slice(cursor, from);
+    cursor = braceEnd;
+    // 若這個鍵原本排在第一個，刪掉後會留下開頭的逗號
+    if (text[cursor] === ',' && /\{\s*$/.test(out)) cursor++;
+  }
+
+  return out + text.slice(cursor);
+}
+
+/** 從左大括號往後找到配對的右大括號，掃描時略過字串內容 */
+function matchingBrace(text, start) {
+  let depth = 0;
+  let inString = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (ch === '\\') i++;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}' && --depth === 0) return i + 1;
+  }
+  return -1;
+}
+
 /** 移除 Wix 免費版在頁面頂端插入的推廣橫幅 */
 function stripWixAds(html) {
   return removeElementById(html, 'WIX_ADS');
@@ -549,6 +627,7 @@ async function main() {
     html = stripDeadMetadata(html);
     html = stripWixAds(html);
     html = stripWixFavicon(html);
+    html = stripWixEndpoints(html);
     html = replaceFonts(html, fontConfig);
 
     const outFile = path.join(SNAPSHOT, fileFromRoute(item.route));
