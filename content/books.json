@@ -1,0 +1,327 @@
+{
+  "books": [
+    {
+      "title": "一流的人如何保持顛峰",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP18【蘿蔔先生 x 昭巽】思考與學習的本質 - 從思到學，善用思考提升你的學習力",
+          "href": "/podcast/s1-ep18"
+        },
+        {
+          "kind": "Podcast",
+          "label": "EP13【蘿蔔先生】年度盤點 - 9個小技巧讓你順利達成年度目標",
+          "href": "/podcast/s1-ep13"
+        }
+      ]
+    },
+    {
+      "title": "如何閱讀一本書",
+      "sources": [
+        {
+          "kind": "書聚",
+          "label": "107.07　《如何閱讀一本書》",
+          "href": "/bookclub"
+        },
+        {
+          "kind": "文章",
+          "label": "讀書會-書聚開團79問",
+          "href": "/post/讀書會-書聚開團79問"
+        }
+      ]
+    },
+    {
+      "title": "3分鐘說18萬個故事，打造影響力",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP16【蘿蔔先生 x 信昌】寫作技巧大公開 - 寫作不難，三招讓你寫出好文章",
+          "href": "/podcast/s1-ep16"
+        }
+      ]
+    },
+    {
+      "title": "了不起的我",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP17【蘿蔔先生 x 昭巽】影響我深遠的一本書《了不起的我》",
+          "href": "/podcast/s1-ep17"
+        }
+      ]
+    },
+    {
+      "title": "上台的技術",
+      "sources": [
+        {
+          "kind": "書聚",
+          "label": "108.02　《上台的技術》實踐分享會",
+          "href": "/bookclub"
+        }
+      ]
+    },
+    {
+      "title": "心態致勝",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP21【蘿蔔先生 x 丹丹】《你想要的一切，宇宙早已為你預備》發生在我身上的一切，都是最美好的事",
+          "href": "/podcast/s1-ep21"
+        }
+      ]
+    },
+    {
+      "title": "卡內基-溝通與人際關係",
+      "sources": [
+        {
+          "kind": "書聚",
+          "label": "107.08　《卡內基-溝通與人際關係》",
+          "href": "/bookclub"
+        }
+      ]
+    },
+    {
+      "title": "打開大家的Evernote筆記本",
+      "sources": [
+        {
+          "kind": "書聚",
+          "label": "107.03　《打開大家的Evernote筆記本》",
+          "href": "/bookclub"
+        }
+      ]
+    },
+    {
+      "title": "再見的練習",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP23【蘿蔔先生 x 呂宮儀Lulu】《停電了》停電後的溫暖時光：一家人找回彼此的距離，天黑黑！黑黑！",
+          "href": "/podcast/s1-ep23"
+        }
+      ]
+    },
+    {
+      "title": "早上最重要的3件事",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP13【蘿蔔先生】年度盤點 - 9個小技巧讓你順利達成年度目標",
+          "href": "/podcast/s1-ep13"
+        }
+      ]
+    },
+    {
+      "title": "你想要的一切，宇宙早已為你預備",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP21【蘿蔔先生 x 丹丹】《你想要的一切，宇宙早已為你預備》發生在我身上的一切，都是最美好的事",
+          "href": "/podcast/s1-ep21"
+        }
+      ]
+    },
+    {
+      "title": "男孩、鼴鼠、狐狸與馬",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP28【蘿蔔先生 x 一吉 Angie】最療癒人心的繪本 《男孩、鼴鼠、狐狸與馬》",
+          "href": "/podcast/s1-ep28"
+        }
+      ]
+    },
+    {
+      "title": "往世界最美的路，請上車",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP23【蘿蔔先生 x 呂宮儀Lulu】《停電了》停電後的溫暖時光：一家人找回彼此的距離，天黑黑！黑黑！",
+          "href": "/podcast/s1-ep23"
+        }
+      ]
+    },
+    {
+      "title": "故事要瘋傳成交 就用這5招",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP16【蘿蔔先生 x 信昌】寫作技巧大公開 - 寫作不難，三招讓你寫出好文章",
+          "href": "/podcast/s1-ep16"
+        }
+      ]
+    },
+    {
+      "title": "停電了",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP23【蘿蔔先生 x 呂宮儀Lulu】《停電了》停電後的溫暖時光：一家人找回彼此的距離，天黑黑！黑黑！",
+          "href": "/podcast/s1-ep23"
+        }
+      ]
+    },
+    {
+      "title": "教學的技術",
+      "sources": [
+        {
+          "kind": "書聚",
+          "label": "108.06　《教學的技術》實踐分享會",
+          "href": "/bookclub"
+        }
+      ]
+    },
+    {
+      "title": "被討厭的勇氣",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP17【蘿蔔先生 x 昭巽】影響我深遠的一本書《了不起的我》",
+          "href": "/podcast/s1-ep17"
+        }
+      ]
+    },
+    {
+      "title": "創造我們的未來 What We’ll Build",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP22【蘿蔔先生 x 呂宮儀Lulu】一本繪本，一段旅程：揭開畫與文字交織的奇妙故事",
+          "href": "/podcast/s1-ep22"
+        }
+      ]
+    },
+    {
+      "title": "普通心理學",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP20【蘿蔔先生 x 丹丹】揭開心理學的多元面紗：那些心理學偷偷告訴你的日常秘密",
+          "href": "/podcast/s1-ep20"
+        }
+      ]
+    },
+    {
+      "title": "遊戲改變世界",
+      "sources": [
+        {
+          "kind": "書聚",
+          "label": "108.08　《遊戲改變世界》實踐分享會",
+          "href": "/bookclub"
+        }
+      ]
+    },
+    {
+      "title": "摳摳手到打勾勾：那些愛與考驗的故事",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP9【蘿蔔先生 x 呂立】《聽，傷痕在說話》守護孩子，從現在開始",
+          "href": "/podcast/s1-ep9"
+        }
+      ]
+    },
+    {
+      "title": "與成功有約",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP13【蘿蔔先生】年度盤點 - 9個小技巧讓你順利達成年度目標",
+          "href": "/podcast/s1-ep13"
+        }
+      ]
+    },
+    {
+      "title": "認知覺醒",
+      "sources": [
+        {
+          "kind": "書聚",
+          "label": "111.11　《認知覺醒》實踐分享會",
+          "href": "/bookclub"
+        }
+      ]
+    },
+    {
+      "title": "說出影響力",
+      "sources": [
+        {
+          "kind": "書聚",
+          "label": "108.07　《說出影響力》",
+          "href": "/bookclub"
+        }
+      ]
+    },
+    {
+      "title": "練習的心境",
+      "sources": [
+        {
+          "kind": "書聚",
+          "label": "109.04　《練習的心境》",
+          "href": "/bookclub"
+        }
+      ]
+    },
+    {
+      "title": "學做工：勞工子弟何以接繼父業？",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP24【蘿蔔先生 x 林奕萱】那些年，讀書會的寶藏：不只是閱讀，還有那些讓人深思的人生故事",
+          "href": "/podcast/s1-ep24"
+        }
+      ]
+    },
+    {
+      "title": "學問：100種提問力創造200倍企業力",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP2【蘿蔔先生 x Tammy】掌握引導技術，讓溝通0障礙",
+          "href": "/podcast/s1-ep2"
+        }
+      ]
+    },
+    {
+      "title": "謊言終結者",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP20【蘿蔔先生 x 丹丹】揭開心理學的多元面紗：那些心理學偷偷告訴你的日常秘密",
+          "href": "/podcast/s1-ep20"
+        }
+      ]
+    },
+    {
+      "title": "躁鬱之心",
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP26【蘿蔔先生 x 林奕萱】影響我人生的一本書 《躁鬱之心》",
+          "href": "/podcast/s1-ep26"
+        }
+      ]
+    },
+    {
+      "title": "麵包小偷",
+      "sources": [
+        {
+          "kind": "書聚",
+          "label": "115.07-08　HPX烤箱讀書會《麵包小偷》繪本導讀 × 五感手作",
+          "href": "/bookclub"
+        }
+      ]
+    },
+    {
+      "title": "聽，傷痕在說話",
+      "aliases": [
+        "聽，傷痕在說話：呂立的兒少保護醫療現場紀實，守護受虐兒，重拾家的力量"
+      ],
+      "sources": [
+        {
+          "kind": "Podcast",
+          "label": "EP9【蘿蔔先生 x 呂立】《聽，傷痕在說話》守護孩子，從現在開始",
+          "href": "/podcast/s1-ep9"
+        }
+      ]
+    }
+  ]
+}

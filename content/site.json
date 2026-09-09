@@ -23,6 +23,10 @@
       "href": "/podcast"
     },
     {
+      "label": "書單",
+      "href": "/books"
+    },
+    {
       "label": "合作邀約",
       "href": "/speaking"
     }

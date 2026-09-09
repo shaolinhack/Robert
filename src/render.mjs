@@ -179,6 +179,45 @@ const blocks = {
 </section>`;
   },
 
+  /**
+   * 書單。每本書列出在哪裡被提到過，把 Podcast、書聚、文章串成一張網——
+   * 這是散在各處的內容做不到的事，也是站內連結最密的一頁。
+   */
+  books(b) {
+    const items = toArray(b.items)
+      .map((book) => {
+        const sources = toArray(book.sources)
+          .map(
+            (s) =>
+              `<li><a href="${escapeHtml(s.href)}">` +
+              `<span class="book__kind">${escapeHtml(s.kind)}</span>` +
+              `${escapeHtml(s.label)}</a></li>`
+          )
+          .join('\n          ');
+        return `<li class="book reveal">
+        <h3 class="book__title">${escapeHtml(book.title)}</h3>
+        ${book.note ? `<p class="book__note">${inline(book.note)}</p>` : ''}
+        <ul class="book__sources">
+          ${sources}
+        </ul>
+      </li>`;
+      })
+      .join('\n      ');
+
+    return `<section class="${sectionClass(b)}">
+  <div class="container">
+    <div class="prose">
+      ${eyebrow(b.eyebrow)}
+      ${heading(b.title)}
+      ${b.body ? paragraphs(b.body) : ''}
+    </div>
+    <ul class="books">
+      ${items}
+    </ul>
+  </div>
+</section>`;
+  },
+
   /** 品牌標誌列 */
   logos(b) {
     const items = toArray(b.items)
