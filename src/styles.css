@@ -273,7 +273,16 @@ a.card { text-decoration: none; color: inherit; }
 @media (hover: hover) {
   a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 }
-.card img { border-radius: var(--radius); margin-bottom: var(--space-2); aspect-ratio: 16/10; object-fit: cover; width: 100%; }
+/* 宣傳圖橫式直式都有，所以不裁切：整張圖 contain 放進固定比例的框，
+   框內剩下的空間用同一張圖放大模糊填滿。卡片高度一致，又不會切掉字。 */
+.card__media {
+  position: relative; aspect-ratio: 16/10; overflow: hidden;
+  border-radius: var(--radius); margin-bottom: var(--space-2);
+  background: var(--bg-inset);
+}
+.card__media img { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; }
+.card__media-bg  { object-fit: cover; filter: blur(16px) saturate(1.15); transform: scale(1.25); }
+.card__media-img { object-fit: contain; }
 .card h3 { margin: 0; }
 .card p  { color: var(--text-muted); font-size: .9375rem; margin: 0; }
 
@@ -620,18 +629,18 @@ a.card { text-decoration: none; color: inherit; }
 }
 .social-row a {
   display: grid; place-items: center; width: 40px; height: 40px;
-  border-radius: 50%; color: var(--accent);
-  border: 1px solid var(--border); background: var(--bg);
+  border-radius: 50%; color: var(--blue);
+  border: 1px solid var(--blue-line); background: var(--bg);
   transition: background-color .15s, color .15s, border-color .15s, transform .15s;
 }
 @media (hover: hover) {
   .social-row a:hover {
-    background: var(--accent); color: var(--accent-text);
-    border-color: var(--accent); transform: translateY(-2px);
+    background: var(--blue); color: #fff;
+    border-color: var(--blue); transform: translateY(-2px);
   }
   .section--invert .social-row a:hover { background: #fff; color: var(--invert-bg); }
 }
-.social-row a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.social-row a:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 .site-footer .social-row { margin: 0; }
 @media (prefers-reduced-motion: reduce) and (hover: hover) { .social-row a:hover { transform: none; } }
 
@@ -674,6 +683,12 @@ a.card { text-decoration: none; color: inherit; }
   color: var(--invert-muted);
 }
 .contact-follow .social-row { margin: 0; }
+/* 深藍底上的主要按鈕：紅色太跳，改用淡藍底深藍字 */
+.section--invert .btn--primary { background: var(--blue-wash); color: var(--blue); }
+@media (hover: hover) {
+  .section--invert .btn--primary:hover { background: #fff; color: var(--blue); }
+}
+
 .contact-form h3 { margin: 0 0 var(--space-5); font-size: 1.375rem; }
 .contact-form__row { display: grid; gap: var(--space-4); }
 @media (min-width: 520px) { .contact-form__row { grid-template-columns: 1fr 1fr; } }

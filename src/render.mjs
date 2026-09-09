@@ -338,8 +338,17 @@ const blocks = {
           item.badge ? ` data-live="${escapeHtml(item.badge)}"` : '',
           item.badgeDone ? ` data-done="${escapeHtml(item.badgeDone)}"` : '',
         ].join('');
+        // 宣傳圖有橫式也有直式，固定比例再裁切會切掉重要資訊。
+        // 這裡改成：整張圖完整放進固定比例的框（contain），框內空白處
+        // 用同一張圖放大模糊當底色填滿，卡片高度一致又不會裁到東西。
+        const media = item.image?.src
+          ? `<div class="card__media">
+        ${image({ ...item.image, alt: '' }, ' class="card__media-bg" aria-hidden="true"')}
+        ${image(item.image, ' class="card__media-img"')}
+      </div>`
+          : '';
         const inner = `
-      ${image(item.image)}
+      ${media}
       ${label ? `<p class="card__badge"${badgeAttrs}>${escapeHtml(label)}</p>` : ''}
       ${item.meta ? `<p class="card__meta">${escapeHtml(item.meta)}</p>` : ''}
       ${heading(item.title, 3)}
