@@ -577,6 +577,8 @@ a.card { text-decoration: none; color: inherit; }
 
 .post__cover { margin-bottom: var(--space-7); }
 .post__cover img { width: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+/* Podcast 封面是正方形，撐滿欄寬會佔掉整個畫面 */
+.post__cover--small { max-width: 260px; margin-bottom: var(--space-6); }
 
 .post__body { max-width: var(--measure); padding-bottom: var(--space-9); }
 .post__body > * { margin-block: 0 var(--space-5); }

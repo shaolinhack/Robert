@@ -248,7 +248,13 @@ const blocks = {
       ${meta ? `<p class="post__meta">${meta}</p>` : ''}
     </div>
   </header>
-  ${b.cover?.src ? `<div class="container"><div class="post__cover">${image({ ...b.cover, eager: true })}</div></div>` : ''}`;
+  ${
+    b.cover?.src
+      ? `<div class="container"><div class="post__cover${
+          b.coverSize === 'small' ? ' post__cover--small' : ''
+        }">${image({ ...b.cover, eager: true })}</div></div>`
+      : ''
+  }`;
   },
 
   /** 文章內文：把節點陣列渲染成語意化 HTML */

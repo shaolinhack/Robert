@@ -191,6 +191,7 @@ function episodePages(podcast) {
           published: ep.published,
           readTime: ep.duration,
           cover: ep.image ? { src: ep.image, alt: ep.title } : null,
+          coverSize: 'small',
           backHref: '/podcast',
           backLabel: '回 Podcast',
         },
