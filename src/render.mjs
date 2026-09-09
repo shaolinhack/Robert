@@ -243,7 +243,7 @@ const blocks = {
     return `<article class="post">
   <header class="post__header">
     <div class="container post__head-inner">
-      <a class="post__back" href="/blog">← 回部落格</a>
+      <a class="post__back" href="${escapeHtml(b.backHref ?? '/blog')}">← ${escapeHtml(b.backLabel ?? '回部落格')}</a>
       <h1>${inline(b.title)}</h1>
       ${meta ? `<p class="post__meta">${meta}</p>` : ''}
     </div>
@@ -375,7 +375,7 @@ const blocks = {
     </div>`
         : ''
     }
-    <div class="cards">
+    <div class="cards${b.ratio === 'square' ? ' cards--square' : ''}">
     ${items}
     </div>
   </div>
@@ -574,6 +574,22 @@ const blocks = {
         }
       </div>
       ${form}
+    </div>
+  </div>
+</section>`;
+  },
+
+  /**
+   * 單集播放器。音檔仍放在 Podcast 代管商那邊（檔案很大，而且下載數要
+   * 由它統計才會進 Apple / Spotify 的排行），這裡只是讓訪客不用離站就能聽。
+   */
+  audio(b) {
+    return `<section class="${sectionClass(b, 'section--tight')}">
+  <div class="container">
+    <div class="player">
+      ${b.src ? `<audio class="player__audio" controls preload="none" src="${escapeHtml(b.src)}"></audio>` : ''}
+      ${b.note ? `<p class="player__note">${inline(b.note)}</p>` : ''}
+      ${actions(b.actions)}
     </div>
   </div>
 </section>`;
@@ -842,6 +858,27 @@ function renderJsonLd({ site, page }) {
       author: { '@id': person['@id'] },
       publisher: { '@id': person['@id'] },
       mainEntityOfPage: url(page.route),
+      inLanguage: site.lang ?? 'zh-Hant',
+    });
+  } else if (page.episode) {
+    const e = page.episode;
+    graph.push({
+      '@type': 'PodcastEpisode',
+      name: page.title,
+      ...(page.description ? { description: page.description } : {}),
+      ...(e.published ? { datePublished: e.published } : {}),
+      ...(e.number ? { episodeNumber: e.number } : {}),
+      ...(e.image ? { image: e.image } : {}),
+      ...(e.audio
+        ? { associatedMedia: { '@type': 'MediaObject', contentUrl: e.audio } }
+        : {}),
+      partOfSeries: {
+        '@type': 'PodcastSeries',
+        name: e.show ?? '讀癮',
+        url: url('/podcast'),
+      },
+      author: { '@id': person['@id'] },
+      url: url(page.route),
       inLanguage: site.lang ?? 'zh-Hant',
     });
   } else if (page.podcast) {

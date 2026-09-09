@@ -142,7 +142,7 @@ function resolveData(page, { milestones, posts, podcast }) {
       const items = (podcast.episodes ?? []).map((ep) => ({
         title: ep.title,
         body: ep.summary ?? '',
-        href: ep.link || undefined,
+        href: `/podcast/${ep.slug}`,
         image: ep.image ? { src: ep.image, alt: ep.title } : undefined,
         meta: [ep.published?.slice(0, 10).replace(/-/g, '.'), ep.duration].filter(Boolean).join('　·　'),
       }));
@@ -158,6 +158,54 @@ function resolveData(page, { milestones, posts, podcast }) {
     return { ...block, items };
   });
   return { ...page, blocks };
+}
+
+/**
+ * 每一集各自一頁。內容（標題、簡介、時間軸、書單）放在自己的網域上，
+ * 音檔與收聽平台則連出去——文字留給搜尋引擎，訂閱留給 Apple。
+ * 頁面直接從 podcast-index.json 生成，重新匯入後新集數會自動出現。
+ */
+function episodePages(podcast) {
+  const show = podcast.show ?? '讀癮';
+  return (podcast.episodes ?? []).map((ep) => {
+    const listen = [
+      ep.appleUrl && { label: '在 Apple Podcasts 收聽', href: ep.appleUrl, variant: 'primary' },
+      ep.link && { label: '在 Firstory 收聽', href: ep.link, variant: 'secondary' },
+    ].filter(Boolean);
+
+    return {
+      route: `/podcast/${ep.slug}`,
+      title: ep.title,
+      description: (ep.summary || ep.description || '').replace(/\s+/g, ' ').slice(0, 160),
+      episode: {
+        show,
+        published: ep.published,
+        number: ep.episode,
+        image: ep.image,
+        audio: ep.audio,
+      },
+      blocks: [
+        {
+          type: 'post-header',
+          title: ep.title,
+          published: ep.published,
+          readTime: ep.duration,
+          cover: ep.image ? { src: ep.image, alt: ep.title } : null,
+          backHref: '/podcast',
+          backLabel: '回 Podcast',
+        },
+        {
+          type: 'audio',
+          src: ep.audio,
+          note: '音檔由 Firstory 提供。想訂閱、收藏或在手機上聽，用下面的連結。',
+          actions: listen,
+        },
+        ...(ep.description
+          ? [{ type: 'prose', title: '本集內容', body: ep.description.split(/\n{2,}/) }]
+          : []),
+      ],
+    };
+  });
 }
 
 function render404(site) {
@@ -268,8 +316,8 @@ async function main() {
     snapshotPages = (await readdir(OUT_DIR, { recursive: true })).filter((f) => f.endsWith('.html')).length;
   }
 
-  // 2. 重寫版覆蓋
-  const pages = await loadPages();
+  // 2. 重寫版覆蓋（含由 podcast-index.json 自動產生的單集頁）
+  const pages = [...(await loadPages()), ...episodePages(podcast)];
   for (const page of pages) {
     await write(fileFromRoute(page.route), renderPage({ site, page: resolveData(page, { milestones, posts, podcast }) }));
   }

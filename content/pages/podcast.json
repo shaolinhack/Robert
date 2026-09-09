@@ -26,6 +26,11 @@
         }
       ]
     },
-    { "type": "cards", "source": "podcast", "title": "所有單集" }
+    {
+      "type": "cards",
+      "source": "podcast",
+      "title": "所有單集",
+      "ratio": "square"
+    }
   ]
 }
