@@ -50,6 +50,17 @@ function image(img, extra = '') {
   }" decoding="async"${extra}>`;
 }
 
+/**
+ * 區塊外層的 class。沒有指定底色的標成 section--plain：
+ * 兩個相鄰的同色區塊會各出一份上下內距，中間就空得太誇張，
+ * CSS 靠這個標記把後面那塊的上內距收掉。
+ */
+function sectionClass(b, extra = '') {
+  return ['section', extra, b?.background ? `section--${b.background}` : 'section--plain']
+    .filter(Boolean)
+    .join(' ');
+}
+
 function actions(list) {
   const items = toArray(list).filter((a) => a?.href && a?.label);
   if (!items.length) return '';
@@ -179,7 +190,7 @@ const blocks = {
       )
       .join('\n      ');
 
-    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
+    return `<section class="${sectionClass(b)}">
   <div class="container">
     <div class="prose"><h2>${escapeHtml(b.title ?? 'BRAND')}</h2></div>
     <ul class="logos">
@@ -204,7 +215,7 @@ const blocks = {
       })
       .join('\n      ');
 
-    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
+    return `<section class="${sectionClass(b)}">
   <div class="container">
     <div class="prose"><h2>${escapeHtml(b.title ?? 'EXPERIENCE')}</h2></div>
     <ul class="experience">
@@ -279,7 +290,7 @@ const blocks = {
 
   /** 純文字段落。level 用來指定標題階層 —— 每頁應該剛好有一個 h1。 */
   prose(b) {
-    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
+    return `<section class="${sectionClass(b)}">
   <div class="container">
     <div class="prose${b.align === 'center' ? ' prose--center' : ''}">
       ${eyebrow(b.eyebrow)}
@@ -293,9 +304,7 @@ const blocks = {
 
   /** 圖文並排 */
   split(b) {
-    return `<section class="section split${b.mediaPosition === 'right' ? ' split--media-right' : ''}${
-      b.background ? ` section--${b.background}` : ''
-    }">
+    return `<section class="${sectionClass(b, 'split')}${b.mediaPosition === 'right' ? ' split--media-right' : ''}">
   <div class="container">
     <div class="split__grid">
       <div class="split__media">${image(b.image)}</div>
@@ -327,7 +336,7 @@ const blocks = {
       })
       .join('\n    ');
 
-    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
+    return `<section class="${sectionClass(b)}">
   <div class="container">
     <div class="prose${b.align === 'center' ? ' prose--center' : ''}">
       ${eyebrow(b.eyebrow)}
@@ -352,7 +361,7 @@ const blocks = {
       )
       .join('\n    ');
 
-    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
+    return `<section class="${sectionClass(b)}">
   <div class="container">
     <div class="prose">
       ${eyebrow(b.eyebrow)}
@@ -422,7 +431,7 @@ const blocks = {
     </div>`
       : '';
 
-    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
+    return `<section class="${sectionClass(b)}">
   <div class="container">
     <div class="prose prose--center">
       ${eyebrow(b.eyebrow)}
@@ -449,7 +458,7 @@ const blocks = {
       )
       .join('\n      ');
 
-    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
+    return `<section class="${sectionClass(b)}">
   <div class="container">
     <div class="prose${b.align === 'center' ? ' prose--center' : ''}">
       ${eyebrow(b.eyebrow)}
@@ -513,7 +522,7 @@ const blocks = {
         <button class="btn btn--primary" type="submit">Submit</button>
       </form>`;
 
-    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
+    return `<section class="${sectionClass(b)}">
   <div class="container">
     <div class="contact-grid">
       <div class="contact-grid__info">
@@ -542,7 +551,7 @@ const blocks = {
   newsletter(b) {
     const endpoint = b.endpoint || '';
     const mailto = b.email ? `mailto:${b.email}?subject=${encodeURIComponent(b.subject ?? '訂閱電子報')}` : '';
-    return `<section class="section section--tight${b.background ? ` section--${b.background}` : ''}">
+    return `<section class="${sectionClass(b, 'section--tight')}">
   <div class="container newsletter">
     <h2 class="newsletter__title">${inline(b.title)}</h2>
     <form class="newsletter__form"${
@@ -575,7 +584,7 @@ const blocks = {
       })
       .join('\n      ');
 
-    return `<section class="section${b.background ? ` section--${b.background}` : ''}">
+    return `<section class="${sectionClass(b)}">
   <div class="container">
     <div class="prose">
       ${eyebrow(b.eyebrow)}

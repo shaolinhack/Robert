@@ -108,6 +108,10 @@ p:last-child { margin-bottom: 0; }
 .section--tight  { padding-block: var(--space-7); }
 .section--subtle { background: var(--bg-subtle); }
 
+/* 兩個相鄰的無底色區塊之間，只需要一份間距。少了這條，頁面開頭的
+   標題與下方內容之間會空出兩份 96px。 */
+.section--plain + .section--plain { padding-top: 0; }
+
 /* 強調帶：用主色極淡的底 */
 .section--accent {
   background: var(--accent-wash);
