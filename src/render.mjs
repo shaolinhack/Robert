@@ -323,15 +323,18 @@ const blocks = {
   cards(b) {
     const items = toArray(b.items)
       .map((item) => {
+        // 有 badge 的卡片外框改成主色，一眼看得出是最新／還沒過去的
+        const cls = `card${item.badge || item.highlight ? ' card--highlight' : ''}`;
         const inner = `
       ${image(item.image)}
+      ${item.badge ? `<p class="card__badge">${escapeHtml(item.badge)}</p>` : ''}
       ${item.meta ? `<p class="card__meta">${escapeHtml(item.meta)}</p>` : ''}
       ${heading(item.title, 3)}
       ${item.body ? `<p>${inline(item.body)}</p>` : ''}`;
         return item.href
-          ? `<a class="card" href="${escapeHtml(item.href)}">${inner}
+          ? `<a class="${cls}" href="${escapeHtml(item.href)}">${inner}
     </a>`
-          : `<article class="card">${inner}
+          : `<article class="${cls}">${inner}
     </article>`;
       })
       .join('\n    ');

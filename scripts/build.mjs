@@ -112,15 +112,24 @@ function resolveData(page, { milestones, posts }) {
   const blocks = (page.blocks ?? []).map((block) => {
     // 文章列表由 posts-index.json 產生，新增文章時列表自動跟著更新
     if (block.type === 'cards' && block.source === 'posts') {
+      // 半年內發布的自動標「最新」。用日期判斷而不是固定標第一篇，
+      // 站放久了才不會把三年前的文章一直掛著「最新」。
+      const FRESH_DAYS = 180;
+      const now = Date.now();
       const items = [...posts]
         .sort((a, b) => String(b.published).localeCompare(String(a.published)))
-        .map((post) => ({
-          title: post.title,
-          body: post.description,
-          href: `/post/${post.slug}`,
-          image: post.cover ? { src: post.cover.src ?? post.cover, alt: post.title } : undefined,
-          meta: [post.published?.slice(0, 10).replace(/-/g, '.'), post.readTime].filter(Boolean).join('　·　'),
-        }));
+        .map((post) => {
+          const at = Date.parse(post.published ?? '');
+          const fresh = Number.isFinite(at) && (now - at) / 86400000 <= FRESH_DAYS;
+          return {
+            title: post.title,
+            body: post.description,
+            href: `/post/${post.slug}`,
+            image: post.cover ? { src: post.cover.src ?? post.cover, alt: post.title } : undefined,
+            meta: [post.published?.slice(0, 10).replace(/-/g, '.'), post.readTime].filter(Boolean).join('　·　'),
+            ...(fresh ? { badge: '最新' } : {}),
+          };
+        });
       return { ...block, items };
     }
 

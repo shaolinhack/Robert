@@ -17,7 +17,7 @@
         "src": "/assets/site/01_JPG.jpg",
         "alt": "李日韋 Robert Lee"
       },
-      "name": "書聚里程碑"
+      "name": "讀書會與活動"
     },
     {
       "type": "cards",
@@ -31,12 +31,14 @@
           "image": {
             "src": "/assets/events/vibe-coding.jpg",
             "alt": "VIBE CODING 你拿 AI 做了什麼？HPX 高雄讀書會 AI 主題聚活動海報"
-          }
+          },
+          "badge": "報名中"
         }
       ]
     },
     {
       "type": "timeline",
+      "title": "歷年紀錄",
       "source": "書聚",
       "filter": true,
       "body": [

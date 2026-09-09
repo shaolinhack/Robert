@@ -249,6 +249,15 @@ p:last-child { margin-bottom: 0; }
   transition: border-color .15s, transform .15s;
 }
 a.card { text-decoration: none; color: inherit; }
+
+/* 最新／即將舉行：外框換成主色，加一顆小標籤 */
+.card--highlight { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.card__badge {
+  align-self: flex-start; margin: 0;
+  padding: 3px 11px; border-radius: 999px;
+  background: var(--accent); color: var(--accent-text);
+  font-size: .75rem; font-weight: 700; letter-spacing: .06em; line-height: 1.6;
+}
 @media (hover: hover) {
   a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 }
