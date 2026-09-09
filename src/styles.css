@@ -111,6 +111,8 @@ p:last-child { margin-bottom: 0; }
 /* 兩個相鄰的無底色區塊之間，只需要一份間距。少了這條，頁面開頭的
    標題與下方內容之間會空出兩份 96px。 */
 .section--plain + .section--plain { padding-top: 0; }
+/* 後面還接著同色區塊時，前一塊的下內距也收窄，中間才不會空一大片 */
+.section--plain:has(+ .section--plain) { padding-bottom: var(--space-7); }
 
 /* 強調帶：用主色極淡的底 */
 .section--accent {
@@ -241,8 +243,14 @@ p:last-child { margin-bottom: 0; }
 
 .cards {
   display: grid; gap: var(--space-5); margin-top: var(--space-6);
-  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  /* auto-fill（不是 auto-fit）——只有一張卡時也維持欄寬，右邊留白，
+     不會被拉成整列寬 */
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
 }
+/* 桌機固定三欄，活動或文章不到三則時另外兩格就留白 */
+@media (min-width: 1000px) { .cards { grid-template-columns: repeat(3, 1fr); } }
+/* 卡片列上面沒有標題時（例如部落格），不需要再多一段上距 */
+.cards:first-child { margin-top: 0; }
 .card {
   background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg);
   padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-2);
@@ -480,13 +488,13 @@ a.card { text-decoration: none; color: inherit; }
 .mail-link {
   display: inline-flex; align-items: center; gap: var(--space-2);
   margin-top: var(--space-3); padding: 7px 14px 7px 11px;
-  border: 1px solid var(--accent-line); border-radius: 999px;
-  background: var(--accent-wash); color: var(--accent);
+  border: 1px solid var(--blue-line); border-radius: 999px;
+  background: var(--blue-wash); color: var(--blue);
   font-size: .9375rem; font-weight: 600; text-decoration: none;
   transition: background-color .15s, border-color .15s, color .15s;
 }
 @media (hover: hover) {
-  .mail-link:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  .mail-link:hover { background: var(--blue); border-color: var(--blue); color: #fff; }
 }
 
 /* ── 品牌標誌 ───────────────────────────────────────────── */
@@ -520,7 +528,7 @@ a.card { text-decoration: none; color: inherit; }
   display: grid; gap: var(--space-6);
   grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
 }
-.experience__item { border-left: 3px solid var(--accent); padding-left: var(--space-4); }
+.experience__item { border-left: 3px solid var(--blue); padding-left: var(--space-4); }
 .experience__role { font-size: 1.0625rem; margin: 0 0 var(--space-1); }
 .experience__org { margin: 0; font-size: .9375rem; }
 .experience__period { margin: var(--space-1) 0 0; color: var(--text-muted); font-size: .875rem; font-variant-numeric: tabular-nums; }

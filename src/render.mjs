@@ -353,13 +353,19 @@ const blocks = {
       })
       .join('\n    ');
 
+    const intro = [eyebrow(b.eyebrow), heading(b.title), b.body ? paragraphs(b.body) : '']
+      .filter(Boolean)
+      .join('\n      ');
+
     return `<section class="${sectionClass(b)}">
-  <div class="container">
+  <div class="container">${
+      intro
+        ? `
     <div class="prose${b.align === 'center' ? ' prose--center' : ''}">
-      ${eyebrow(b.eyebrow)}
-      ${heading(b.title)}
-      ${b.body ? paragraphs(b.body) : ''}
-    </div>
+      ${intro}
+    </div>`
+        : ''
+    }
     <div class="cards">
     ${items}
     </div>

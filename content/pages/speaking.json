@@ -54,21 +54,41 @@
       "type": "icon-grid",
       "title": "一些數字",
       "items": [
-        { "label": "9 年社群經營", "icon": "calendar" },
-        { "label": "38 場活動紀錄", "icon": "users-round" },
-        { "label": "Podcast 主持", "icon": "podcast" },
-        { "label": "工程本業經營", "icon": "server" }
+        {
+          "label": "9 年社群經營",
+          "icon": "calendar"
+        },
+        {
+          "label": "38 場活動紀錄",
+          "icon": "users-round"
+        },
+        {
+          "label": "Podcast 主持",
+          "icon": "podcast"
+        },
+        {
+          "label": "工程本業經營",
+          "icon": "server"
+        }
       ]
     },
     {
       "type": "cta",
       "title": "想聊聊，直接來信就好",
       "body": [
-        "來信請簡單說明：對象是誰、大概多少人、希望的時間與地點、想聚焦哪個方向。我會在兩個工作天內回覆。"
+        "來信請簡單說明：對象是誰、大概多少人、希望的時間與地點、想聚焦哪個方向。我會在一週工作天內回覆。"
       ],
       "actions": [
-        { "label": "shaolinhack@gmail.com", "href": "mailto:shaolinhack@gmail.com?subject=講座%20/%20合作邀約", "variant": "primary" },
-        { "label": "看我寫過什麼", "href": "/blog", "variant": "secondary" }
+        {
+          "label": "shaolinhack@gmail.com",
+          "href": "mailto:shaolinhack@gmail.com?subject=講座%20/%20合作邀約",
+          "variant": "primary"
+        },
+        {
+          "label": "看我寫過什麼",
+          "href": "/blog",
+          "variant": "secondary"
+        }
       ]
     }
   ]
