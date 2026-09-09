@@ -60,6 +60,18 @@ function plain(html) {
 }
 
 /**
+ * 每一集的簡介末段都是同一套推廣樣板（追蹤連結、主持人簡介、支持我們、
+ * Powered by…）。28 集重複同一段對搜尋引擎是重複內容，也會把真正的
+ * 內容埋掉，所以放進頁面前先切掉。
+ */
+const BOILERPLATE = /※\s*歡迎追蹤|\[一起學習|\[讀癮\s*-\s*主持人\]|\[支持我們\]|留言告訴我你對這一集的想法|Powered by Firstory/;
+
+function stripBoilerplate(text) {
+  const cut = text.search(BOILERPLATE);
+  return (cut === -1 ? text : text.slice(0, cut)).trim();
+}
+
+/**
  * 從節目簡介擠出一句可以放在卡片上的摘要。
  * 簡介的固定結構是「[本集談論話題時間軸] + 時間戳條列 + 推廣連結」，
  * 直接取第一行會變成沒有意義的標題列，所以先把這些雜訊清掉。
@@ -160,6 +172,7 @@ async function main() {
       published,
       duration: duration(tag(item, 'itunes:duration')),
       description: plain(body),
+      notes: stripBoilerplate(plain(body)),
       summary: summarise(plain(body)),
       link: tag(item, 'link') || attr(item, 'enclosure', 'url'),
       audio: attr(item, 'enclosure', 'url'),

@@ -201,8 +201,8 @@ function episodePages(podcast) {
           note: '音檔由 Firstory 提供。想訂閱、收藏或在手機上聽，用下面的連結。',
           actions: listen,
         },
-        ...(ep.description
-          ? [{ type: 'prose', title: '本集內容', body: ep.description.split(/\n{2,}/) }]
+        ...(ep.notes
+          ? [{ type: 'prose', title: '本集內容', body: ep.notes.split(/\n{2,}/) }]
           : []),
       ],
     };

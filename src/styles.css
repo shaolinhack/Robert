@@ -562,6 +562,8 @@ a.card { text-decoration: none; color: inherit; }
    ───────────────────────────────────────────────────────── */
 
 .post__header { padding-block: var(--space-8) var(--space-6); }
+/* 只限制寬度，不要再置中——外層的 .container 已經做好置中與內距，
+   這裡若又自己 margin auto，標題就會跟下方的封面、內文對不齊。 */
 .post__head-inner { max-width: var(--measure); }
 .post__back {
   display: inline-block; margin-bottom: var(--space-4);

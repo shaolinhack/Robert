@@ -242,10 +242,12 @@ const blocks = {
 
     return `<article class="post">
   <header class="post__header">
-    <div class="container post__head-inner">
+    <div class="container">
+      <div class="post__head-inner">
       <a class="post__back" href="${escapeHtml(b.backHref ?? '/blog')}">← ${escapeHtml(b.backLabel ?? '回部落格')}</a>
       <h1>${inline(b.title)}</h1>
       ${meta ? `<p class="post__meta">${meta}</p>` : ''}
+      </div>
     </div>
   </header>
   ${
