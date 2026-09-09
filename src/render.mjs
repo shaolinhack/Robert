@@ -829,6 +829,18 @@ function renderJsonLd({ site, page }) {
       mainEntityOfPage: url(page.route),
       inLanguage: site.lang ?? 'zh-Hant',
     });
+  } else if (page.podcast) {
+    graph.push({
+      '@type': 'PodcastSeries',
+      name: page.podcast.name ?? page.title,
+      ...(page.description ? { description: page.description } : {}),
+      ...(page.podcast.image ? { image: url(page.podcast.image) } : {}),
+      ...(page.podcast.feed ? { webFeed: page.podcast.feed } : {}),
+      ...(page.podcast.sameAs?.length ? { sameAs: page.podcast.sameAs } : {}),
+      author: { '@id': person['@id'] },
+      url: url(page.route),
+      inLanguage: site.lang ?? 'zh-Hant',
+    });
   } else if (page.event) {
     // 活動頁補上 Event：Google 的活動搜尋與 AI 都靠這段判斷時間地點。
     const e = page.event;

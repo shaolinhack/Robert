@@ -89,7 +89,7 @@ async function loadPages() {
  * 把區塊裡的 source 換成 content/ 底下的實際資料。
  * 時間軸這種會一直長的內容獨立成資料檔，頁面只要指名要哪一份就好。
  */
-function resolveData(page, { milestones, posts }) {
+function resolveData(page, { milestones, posts, podcast }) {
   // 文章頁在 content 裡是「一篇文章」的形狀（標題、日期、內文節點），
   // 而不是區塊陣列 —— 寫文章的人不該去組版面。這裡把它展開成區塊。
   if (page.layout === 'post') {
@@ -134,6 +134,18 @@ function resolveData(page, { milestones, posts }) {
             ...(fresh ? { badge: '最新' } : {}),
           };
         });
+      return { ...block, items };
+    }
+
+    // 單集清單由 podcast-index.json 產生（跑 scripts/import-podcast.mjs 更新）
+    if (block.type === 'cards' && block.source === 'podcast') {
+      const items = (podcast.episodes ?? []).map((ep) => ({
+        title: ep.title,
+        body: ep.description ? ep.description.split('\n')[0].slice(0, 110) : '',
+        href: ep.link || undefined,
+        image: ep.image ? { src: ep.image, alt: ep.title } : undefined,
+        meta: [ep.published?.slice(0, 10).replace(/-/g, '.'), ep.duration].filter(Boolean).join('　·　'),
+      }));
       return { ...block, items };
     }
 
@@ -246,6 +258,7 @@ async function main() {
   site.stylesheet = `/assets/styles.${cssHash}.css`;
   const milestones = (await readJson(path.join(CONTENT_DIR, 'milestones.json'))) ?? {};
   const posts = (await readJson(path.join(CONTENT_DIR, 'posts-index.json'))) ?? [];
+  const podcast = (await readJson(path.join(CONTENT_DIR, 'podcast-index.json'))) ?? { episodes: [] };
 
   // 1. 快照打底
   const hasSnapshot = await isNonEmptyDir(SNAPSHOT_DIR);
@@ -258,7 +271,7 @@ async function main() {
   // 2. 重寫版覆蓋
   const pages = await loadPages();
   for (const page of pages) {
-    await write(fileFromRoute(page.route), renderPage({ site, page: resolveData(page, { milestones, posts }) }));
+    await write(fileFromRoute(page.route), renderPage({ site, page: resolveData(page, { milestones, posts, podcast }) }));
   }
 
   // 3. 設計系統與自備素材

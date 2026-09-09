@@ -1,0 +1,31 @@
+{
+  "title": "讀癮 Podcast",
+  "description": "蘿蔔先生（李日韋）主持的 Podcast「讀癮」——一本書、一段對話，聊閱讀、成長與生活。歷年單集清單與內容摘要。",
+  "route": "/podcast",
+  "podcast": {
+    "name": "讀癮",
+    "sameAs": [
+      "https://podcasts.apple.com/tw/podcast/%E8%AE%80%E7%99%AE/id1662758348"
+    ]
+  },
+  "blocks": [
+    {
+      "type": "prose",
+      "eyebrow": "Podcast",
+      "title": "讀癮",
+      "level": 1,
+      "align": "center",
+      "body": [
+        "一本書、一段對話。聊閱讀、成長，也聊那些讀完之後真的改變了什麼的事。"
+      ],
+      "actions": [
+        {
+          "label": "在 Apple Podcasts 收聽",
+          "href": "https://podcasts.apple.com/tw/podcast/%E8%AE%80%E7%99%AE/id1662758348",
+          "variant": "primary"
+        }
+      ]
+    },
+    { "type": "cards", "source": "podcast", "title": "所有單集" }
+  ]
+}
