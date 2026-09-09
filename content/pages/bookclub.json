@@ -20,6 +20,22 @@
       "name": "書聚里程碑"
     },
     {
+      "type": "cards",
+      "title": "近期活動",
+      "items": [
+        {
+          "meta": "2026/09 – 11 · 連續三場",
+          "title": "VIBE CODING｜你拿 AI 做了什麼？",
+          "body": "不談「AI 可以做什麼」，只談你實際做出了什麼——每位成員帶著自己的 AI 作品來交流。",
+          "href": "/event/vibe-coding",
+          "image": {
+            "src": "/assets/events/vibe-coding.jpg",
+            "alt": "VIBE CODING 你拿 AI 做了什麼？HPX 高雄讀書會 AI 主題聚活動海報"
+          }
+        }
+      ]
+    },
+    {
       "type": "timeline",
       "source": "書聚",
       "filter": true,

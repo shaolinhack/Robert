@@ -203,8 +203,9 @@
       "items": [
         {
           "role": "海密/展旭水電/耀光機電",
-          "org": "@haimi.com.tw",
-          "period": "2014 - Current"
+          "org": "haimi.com.tw",
+          "period": "2014 - Current",
+          "href": ""
         },
         {
           "role": "鴻海科技集團 Foxconn",

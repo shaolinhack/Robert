@@ -784,6 +784,35 @@ function renderJsonLd({ site, page }) {
       mainEntityOfPage: url(page.route),
       inLanguage: site.lang ?? 'zh-Hant',
     });
+  } else if (page.event) {
+    // 活動頁補上 Event：Google 的活動搜尋與 AI 都靠這段判斷時間地點。
+    const e = page.event;
+    graph.push({
+      '@type': 'Event',
+      name: e.name ?? page.title,
+      ...(page.description ? { description: page.description } : {}),
+      ...(e.startDate ? { startDate: e.startDate } : {}),
+      ...(e.endDate ? { endDate: e.endDate } : {}),
+      eventStatus: 'https://schema.org/EventScheduled',
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      ...(e.location ? { location: { '@type': 'Place', name: e.location } } : {}),
+      ...(e.organizer ? { organizer: { '@type': 'Organization', name: e.organizer } } : {}),
+      ...(e.image ? { image: url(e.image) } : {}),
+      ...(e.price
+        ? {
+            offers: {
+              '@type': 'Offer',
+              price: e.price,
+              priceCurrency: e.currency ?? 'TWD',
+              url: url(page.route),
+              availability: 'https://schema.org/InStock',
+            },
+          }
+        : {}),
+      performer: { '@id': person['@id'] },
+      url: url(page.route),
+      inLanguage: site.lang ?? 'zh-Hant',
+    });
   } else {
     graph.push({
       '@type': 'WebSite',

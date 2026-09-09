@@ -17,6 +17,10 @@
     {
       "label": "部落格",
       "href": "/blog"
+    },
+    {
+      "label": "合作邀約",
+      "href": "/speaking"
     }
   ],
   "social": [
