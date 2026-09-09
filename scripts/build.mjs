@@ -141,7 +141,7 @@ function resolveData(page, { milestones, posts, podcast }) {
     if (block.type === 'cards' && block.source === 'podcast') {
       const items = (podcast.episodes ?? []).map((ep) => ({
         title: ep.title,
-        body: ep.description ? ep.description.split('\n')[0].slice(0, 110) : '',
+        body: ep.summary ?? '',
         href: ep.link || undefined,
         image: ep.image ? { src: ep.image, alt: ep.title } : undefined,
         meta: [ep.published?.slice(0, 10).replace(/-/g, '.'), ep.duration].filter(Boolean).join('　·　'),

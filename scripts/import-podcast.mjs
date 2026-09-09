@@ -59,6 +59,23 @@ function plain(html) {
     .trim();
 }
 
+/**
+ * 從節目簡介擠出一句可以放在卡片上的摘要。
+ * 簡介的固定結構是「[本集談論話題時間軸] + 時間戳條列 + 推廣連結」，
+ * 直接取第一行會變成沒有意義的標題列，所以先把這些雜訊清掉。
+ */
+function summarise(text) {
+  const body = text.split(/※歡迎追蹤|\[本集節目書籍|\[一起學習/)[0];
+  const topics = body
+    .split('\n')
+    .map((line) => line.replace(/^\s*\d{1,2}:\d{2}(:\d{2})?\s*/, '').trim())
+    .filter((line) => line && !/^\[.*\]$/.test(line) && !/^[．.]|https?:\/\//.test(line))
+    // 每集開頭都是「來賓介紹」之類的例行項目，當摘要沒有資訊量
+    .filter((line) => !/^(來賓自我?介紹|自我介紹|開場|前言|節目介紹)$/.test(line));
+  if (!topics.length) return '';
+  return topics.slice(0, 4).join('・');
+}
+
 /** itunes:duration 可能是秒數或 hh:mm:ss */
 function duration(raw) {
   if (!raw) return '';
@@ -80,18 +97,22 @@ async function load(source) {
   return res.text();
 }
 
+/**
+ * 把封面存到本機。抓不到（例如網路受限）就退回遠端網址——
+ * 頁面照樣看得到圖，之後在能連外的機器上重跑就會換成本地檔案。
+ */
 async function saveImage(url, slug) {
   if (!url) return null;
   try {
     const res = await fetch(url);
-    if (!res.ok) return null;
+    if (!res.ok) return url;
     const buf = Buffer.from(await res.arrayBuffer());
     const ext = /\.(png|jpe?g|webp)(\?|$)/i.exec(url)?.[1]?.toLowerCase() ?? 'jpg';
     const name = `${slug}.${ext === 'jpeg' ? 'jpg' : ext}`;
     await writeFile(path.join(ASSET_DIR, name), buf);
     return `/assets/podcast/${name}`;
   } catch {
-    return null;
+    return url;
   }
 }
 
@@ -139,6 +160,7 @@ async function main() {
       published,
       duration: duration(tag(item, 'itunes:duration')),
       description: plain(body),
+      summary: summarise(plain(body)),
       link: tag(item, 'link') || attr(item, 'enclosure', 'url'),
       audio: attr(item, 'enclosure', 'url'),
       ...(image ? { image } : {}),
