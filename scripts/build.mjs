@@ -127,6 +127,10 @@ function resolveData(page, { milestones, posts }) {
             href: `/post/${post.slug}`,
             image: post.cover ? { src: post.cover.src ?? post.cover, alt: post.title } : undefined,
             meta: [post.published?.slice(0, 10).replace(/-/g, '.'), post.readTime].filter(Boolean).join('　·　'),
+            // until 交給前端再校正一次；沒有 badgeDone，過期就整顆消失
+            ...(Number.isFinite(at)
+              ? { until: new Date(at + FRESH_DAYS * 86400000).toISOString() }
+              : {}),
             ...(fresh ? { badge: '最新' } : {}),
           };
         });

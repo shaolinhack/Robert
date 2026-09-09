@@ -323,18 +323,32 @@ const blocks = {
   cards(b) {
     const items = toArray(b.items)
       .map((item) => {
-        // 有 badge 的卡片外框改成主色，一眼看得出是最新／還沒過去的
-        const cls = `card${item.badge || item.highlight ? ' card--highlight' : ''}`;
+        // until 之前算「進行中」，之後算「已結束」。這裡先在建置時算一次，
+        // 頁面載入時瀏覽器再依當下時間校正一次（見 BEHAVIOUR_SCRIPT），
+        // 這樣就算很久沒重新建置，訪客看到的狀態也是對的。
+        const until = item.until ? Date.parse(item.until) : NaN;
+        const dated = Number.isFinite(until);
+        const done = dated && Date.now() > until;
+        const label = done ? item.badgeDone ?? '' : item.badge ?? '';
+        const cls = [
+          'card',
+          label || item.highlight ? (done ? 'card--done' : 'card--highlight') : '',
+        ].filter(Boolean).join(' ');
+        const badgeAttrs = [
+          item.badge ? ` data-live="${escapeHtml(item.badge)}"` : '',
+          item.badgeDone ? ` data-done="${escapeHtml(item.badgeDone)}"` : '',
+        ].join('');
         const inner = `
       ${image(item.image)}
-      ${item.badge ? `<p class="card__badge">${escapeHtml(item.badge)}</p>` : ''}
+      ${label ? `<p class="card__badge"${badgeAttrs}>${escapeHtml(label)}</p>` : ''}
       ${item.meta ? `<p class="card__meta">${escapeHtml(item.meta)}</p>` : ''}
       ${heading(item.title, 3)}
       ${item.body ? `<p>${inline(item.body)}</p>` : ''}`;
+        const dataUntil = dated ? ` data-until="${escapeHtml(item.until)}"` : '';
         return item.href
-          ? `<a class="${cls}" href="${escapeHtml(item.href)}">${inner}
+          ? `<a class="${cls}" href="${escapeHtml(item.href)}"${dataUntil}>${inner}
     </a>`
-          : `<article class="${cls}">${inner}
+          : `<article class="${cls}"${dataUntil}>${inner}
     </article>`;
       })
       .join('\n    ');
@@ -710,6 +724,25 @@ const BEHAVIOUR_SCRIPT = `<script>
       });
     });
   });
+
+  // 卡片狀態校正：建置時算過一次，但站可能很久沒重新建置，
+  // 所以載入時再用瀏覽器當下的時間對一次 data-until。
+  (function () {
+    var now = Date.now();
+    [].forEach.call(document.querySelectorAll('[data-until]'), function (card) {
+      var until = Date.parse(card.getAttribute('data-until'));
+      if (isNaN(until)) return;
+      var done = now > until;
+      card.classList.toggle('card--highlight', !done);
+      card.classList.toggle('card--done', done);
+      var badge = card.querySelector('.card__badge');
+      if (!badge) return;
+      var label = done ? badge.getAttribute('data-done') : badge.getAttribute('data-live');
+      // 結束後沒有指定文字的（例如文章的「最新」），就整顆拿掉
+      if (label) badge.textContent = label;
+      else { badge.remove(); card.classList.remove('card--done'); }
+    });
+  })();
 
   // 文章內的圖片點一下放大：疊一層全螢幕檢視，再點一下或按 Esc 關閉。
   (function () {
