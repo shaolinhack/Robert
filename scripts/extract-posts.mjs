@@ -155,6 +155,13 @@ function parseBody(html) {
   return nodes;
 }
 
+/** 取出 Wix 圖片網址裡的媒體 ID：/assets/site/58bc5a_xxxx~mv2.jpg → 58bc5a_xxxx */
+function wixMediaId(url) {
+  if (!url) return null;
+  const m = /\/([^/]+?)~mv2/.exec(url);
+  return m ? m[1] : url.split('/').pop();
+}
+
 function meta(html, property, attr = 'content') {
   const tag = html.match(new RegExp(`<meta[^>]*property="${property}"[^>]*>`, 'i'))?.[0];
   return tag?.match(new RegExp(`${attr}="([^"]*)"`, 'i'))?.[1] ?? null;
@@ -196,7 +203,9 @@ async function main() {
     const description = meta(html, 'og:description');
 
     // 內文第一張圖若就是封面，去掉它 —— 否則同一張圖會連續出現兩次
-    if (cover && nodes[0]?.t === 'img' && nodes[0].src === cover) nodes.shift();
+    // 首圖常常就是封面再放一次。同一張 Wix 圖可能因裁切參數不同而存成不同檔名
+    // （例如 …~mv2.jpg 與 …~mv2.446d791f.jpg），所以比對媒體 ID 而不是整個網址。
+    if (cover && nodes[0]?.t === 'img' && wixMediaId(nodes[0].src) === wixMediaId(cover)) nodes.shift();
 
     const page = {
       title,
