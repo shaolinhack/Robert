@@ -186,6 +186,10 @@ const blocks = {
   books(b) {
     const items = toArray(b.items)
       .map((book) => {
+        // 書封有版權，不能抓也不能自己存。改用書名首字做成識別標記：
+        // 完全是自己產生的圖形，配色由書名決定所以每本固定不變。
+        const tone = [...book.title].reduce((n, c) => (n * 31 + c.codePointAt(0)) >>> 0, 7) % 6;
+        const glyph = book.glyph ?? [...book.title.replace(/^[《「（(]/, '')][0] ?? '書';
         const sources = toArray(book.sources)
           .map(
             (s) =>
@@ -195,7 +199,9 @@ const blocks = {
           )
           .join('\n          ');
         return `<li class="book reveal">
+        <div class="book__mark" data-tone="${tone}" aria-hidden="true">${escapeHtml(glyph)}</div>
         <h3 class="book__title">${escapeHtml(book.title)}</h3>
+        ${book.meta ? `<p class="book__meta">${escapeHtml(book.meta)}</p>` : ''}
         ${book.note ? `<p class="book__note">${inline(book.note)}</p>` : ''}
         <ul class="book__sources">
           ${sources}
