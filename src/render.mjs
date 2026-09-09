@@ -254,7 +254,9 @@ const blocks = {
               .map((x) => `<li>${inline(x)}</li>`)
               .join('')}</${node.t}>`;
           case 'img':
-            return `<figure>${image(node)}${
+            // 文章裡的圖點一下可以放大看（原站也是這個行為）
+            return `<figure>${image(node, ' class="zoomable" tabindex="0" role="button"' +
+              ' aria-label="放大檢視圖片"')}${
               node.caption ? `<figcaption>${inline(node.caption)}</figcaption>` : ''
             }</figure>`;
           case 'quote':
@@ -696,6 +698,55 @@ const BEHAVIOUR_SCRIPT = `<script>
       });
     });
   });
+
+  // 文章內的圖片點一下放大：疊一層全螢幕檢視，再點一下或按 Esc 關閉。
+  (function () {
+    var box = null;
+    var full = null;
+    var lastFocus = null;
+
+    function build() {
+      box = document.createElement('div');
+      box.className = 'lightbox';
+      box.setAttribute('role', 'dialog');
+      box.setAttribute('aria-modal', 'true');
+      box.setAttribute('aria-label', '圖片檢視');
+      full = document.createElement('img');
+      box.appendChild(full);
+      box.addEventListener('click', close);
+      document.body.appendChild(box);
+    }
+
+    function open(img) {
+      if (!box) build();
+      full.src = img.currentSrc || img.src;
+      full.alt = img.alt || '';
+      lastFocus = document.activeElement;
+      box.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      box.focus();
+    }
+
+    function close() {
+      if (!box) return;
+      box.classList.remove('is-open');
+      document.body.style.overflow = '';
+      full.removeAttribute('src');
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    document.addEventListener('click', function (e) {
+      var img = e.target.closest && e.target.closest('.zoomable');
+      if (img) open(img);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') return close();
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var img = e.target.closest && e.target.closest('.zoomable');
+      if (img) { e.preventDefault(); open(img); }
+    });
+  })();
 <\/script>`;
 
 /**
